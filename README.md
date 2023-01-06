@@ -71,10 +71,7 @@ with LottieAnimation.from_data(data=data) as anim:
     anim.save_animation('animation3.webp')
 ```
 
-You may also load animation with the method below
-However, before loading other file, you have to delete previously created LottieAnimation first
-Or else, the previous animation would persist
-Alternatively, you may use multiprocessing
+You may also load animation with the method below. However, before loading other file, you have to delete previously created LottieAnimation first. Or else, the previous animation would persist (Alternatively, you may use multiprocessing)
 ```
 from rlottie_python import LottieAnimation
 
