@@ -7,6 +7,6 @@ add_subdirectory(rlottie)
 # Install the module
 install(TARGETS rlottie
         EXCLUDE_FROM_ALL
-        LIBRARY     DESTINATION    ${LIB_INSTALL_DIR}
-        ARCHIVE     DESTINATION    ${LIB_INSTALL_DIR}
+        LIBRARY     DESTINATION    ${PY_BUILD_CMAKE_MODULE_NAME}
+        ARCHIVE     DESTINATION    ${PY_BUILD_CMAKE_MODULE_NAME}
         COMPONENT python_modules)
