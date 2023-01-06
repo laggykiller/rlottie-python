@@ -1,0 +1,34 @@
+[project] # Project metadata
+name = "rlottie-python"
+readme = "README.md"
+license = { "file" = "LICENSE" }
+authors = [{ "name" = "chaudominic", "email" = "chaudominic2@gmail.com" }]
+keywords = ["rlottie", "lottie", "tgs", "ctypes"]
+classifiers = ["Topic :: Multimedia :: Graphics"]
+urls = { "Documentation" = "https://github.com/laggykiller/rlottie-python" }
+dependencies = ["Pillow", "numpy"]
+dynamic = ["version", "description"]
+
+[build-system] # How pip and other frontends should build this project
+requires = ["py-build-cmake~=0.1.2"]
+build-backend = "py_build_cmake.build"
+
+[tool.py-build-cmake.module] # Where to find the Python module to package
+name = "rlottie_python"
+directory = "."
+
+[tool.py-build-cmake.sdist] # What to include in source distributions
+include = ["CMakeLists.txt", "rlottie/*"]
+
+[tool.py-build-cmake.cmake] # How to build the CMake project
+# build_type = "RelWithDebInfo"
+# source_path = "rlottie"
+# build_args = ["-j"]
+# install_components = ["rlottie"]
+
+build_type = "RelWithDebInfo"
+source_path = "."
+build_args = ["-j"]
+install_components = ["python_module"]
+
+[tool.py-build-cmake.stubgen] # Whether and how to generate typed stub files
