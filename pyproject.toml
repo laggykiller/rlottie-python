@@ -21,11 +21,6 @@ directory = "."
 include = ["CMakeLists.txt", "rlottie/*"]
 
 [tool.py-build-cmake.cmake] # How to build the CMake project
-# build_type = "RelWithDebInfo"
-# source_path = "rlottie"
-# build_args = ["-j"]
-# install_components = ["rlottie"]
-
 build_type = "RelWithDebInfo"
 source_path = "."
 build_args = ["-j"]
