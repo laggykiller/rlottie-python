@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 3.17)
 project(rlottie-python)
-find_package(Python COMPONENTS Development.Module REQUIRED)
 
 add_subdirectory(rlottie)
 
