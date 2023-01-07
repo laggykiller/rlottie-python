@@ -27,6 +27,10 @@ jobs:
         uses: pypa/cibuildwheel@v2.11.4
         env:
           CIBW_BUILD_FRONTEND: build
+          # Depends on mypy which reliles on typed-ast
+          # Cannot run on pypy <3.8
+          # https://mypy.readthedocs.io/en/stable/faq.html
+          CIBW_SKIP: pp37-*
 
       - uses: actions/upload-artifact@v3
         with:
