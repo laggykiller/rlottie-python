@@ -11,27 +11,27 @@ Getting information about an lottie animation
 ```
 from rlottie_python import LottieAnimation
 
-with LottieAnimation.from_file('example/sample.json') as anim:
-    frames = anim.lottie_animation_get_totalframe()
-    print(f'{frames = }')
+anim = LottieAnimation.from_file('example/sample.json')
+frames = anim.lottie_animation_get_totalframe()
+print(f'{frames = }')
 
-    width, height = anim.lottie_animation_get_size()
-    print(f'{width, height = }')
+width, height = anim.lottie_animation_get_size()
+print(f'{width, height = }')
 
-    duration = anim.lottie_animation_get_duration()
-    print(f'{duration = }')
+duration = anim.lottie_animation_get_duration()
+print(f'{duration = }')
 
-    totalframe = anim.lottie_animation_get_totalframe()
-    print(f'{totalframe = }')
+totalframe = anim.lottie_animation_get_totalframe()
+print(f'{totalframe = }')
 
-    framerate = anim.lottie_animation_get_framerate()
-    print(f'{framerate = }')
+framerate = anim.lottie_animation_get_framerate()
+print(f'{framerate = }')
 
-    render_tree = anim.lottie_animation_render_tree(0)
-    print(f'{render_tree.mMaskList.size = }')
+render_tree = anim.lottie_animation_render_tree(0)
+print(f'{render_tree.mMaskList.size = }')
 
-    mapped_frame = anim.lottie_animation_get_frame_at_pos(0)
-    print(f'{mapped_frame = }')
+mapped_frame = anim.lottie_animation_get_frame_at_pos(0)
+print(f'{mapped_frame = }')
 ```
 
 Rendering and saving frame
@@ -39,51 +39,46 @@ Rendering and saving frame
 from rlottie_python import LottieAnimation
 from PIL import Image
 
-with LottieAnimation.from_file('example/sample.json') as anim:
-    # Method 1: Saving the frame to file directly
-    anim.save_frame('frame30.png', frame_num=30)
+anim = LottieAnimation.from_file('example/sample.json')
 
-    # Method 2: Getting Pillow Image
-    im = anim.render_pillow_frame(frame_num=40)
-    im.save('frame40.png')
+# Method 1: Saving the frame to file directly
+anim.save_frame('frame30.png', frame_num=30)
 
-    # Method 3: Getting buffer
-    buffer = anim.lottie_animation_render(frame_num=50)
-    width, height = anim.lottie_animation_get_size()
-    im = Image.frombuffer('RGBA', (width, height), buffer, 'raw', 'BGRA')
-    im.save('frame50.png')
+# Method 2: Getting Pillow Image
+im = anim.render_pillow_frame(frame_num=40)
+im.save('frame40.png')
+
+# Method 3: Getting buffer
+buffer = anim.lottie_animation_render(frame_num=50)
+width, height = anim.lottie_animation_get_size()
+im = Image.frombuffer('RGBA', (width, height), buffer, 'raw', 'BGRA')
+im.save('frame50.png')
 ```
 
-Rendering animation
+Loading from JSON file, string of JSON, tgs; and rendering animation
 ```
 from rlottie_python import LottieAnimation
 
-with LottieAnimation.from_file('example/sample.json') as anim:
-    anim.save_animation('animation1.apng')
+# Loading from file
+anim = LottieAnimation.from_file('example/sample.json')
+anim.save_animation('animation1.apng')
 
-with LottieAnimation.from_tgs('example/sample.tgs') as anim:
-    anim.save_animation('animation2.gif')
+anim = LottieAnimation.from_tgs('example/sample.tgs')
+anim.save_animation('animation2.gif')
 
 with open('example/sample.json') as f:
     data = f.read()
 
-with LottieAnimation.from_data(data=data) as anim:
-    anim.save_animation('animation3.webp')
+anim = LottieAnimation.from_data(data=data)
+anim.save_animation('animation3.webp')
 ```
 
-You may also load animation with the method below. However, before loading other file, you have to delete previously created LottieAnimation first. Or else, the previous animation would persist (Alternatively, you may use multiprocessing)
+You may also load animation using with statement
 ```
 from rlottie_python import LottieAnimation
 
-anim = LottieAnimation.from_file('example/sample.json')
-
-# Do what you want here
-
-# Delete previously created LottieAnimation instance before loading other file
-del anim
-
-# Now you may load another file
-anim = LottieAnimation.from_tgs('example/sample.tgs')
+with LottieAnimation.from_file('example/sample.json') as anim:
+    anim.save_animation('animation4.apng')
 ```
 
 ## Credits

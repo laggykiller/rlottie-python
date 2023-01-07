@@ -34,28 +34,30 @@ buffer = anim.lottie_animation_render(frame_num=30)
 im = Image.frombuffer('RGBA', (width, height), buffer, 'raw', 'BGRA')
 im.save('test1.png')
 
-# Before loading other file, you have to delete previously created LottieAnimation first
-# Or else, the previous animation would persist
-# Alternatively, you may use multiprocessing
-del anim
-
-# Now you may load new animation safely
-with open(json_file) as f:
-    with LottieAnimation.from_data(data=f.read()) as anim:
-        # Saving frame with save_frame
-        anim.save_frame('test2.png', frame_num=30)
+# Loading from tgs file
+anim = LottieAnimation.from_tgs(path=tgs_file)
 
 # Directly get pillow Image
 im = anim.render_pillow_frame(frame_num=40)
+im.save('test2.png')
+
+# Directly get buffer
+buffer = anim.lottie_animation_render(frame_num=50)
+width, height = anim.lottie_animation_get_size()
+im = Image.frombuffer('RGBA', (width, height), buffer, 'raw', 'BGRA')
 im.save('test3.png')
 
-# After finishing, it is a good practice to delete instance of LottieAnimation
-del anim
+# Loading JSON string with from_data()
+with open(json_file) as f:
+    data = f.read()
 
-# To avoid deleting manually, you may do this instead
-# Loading from tgs file
+# Alternative way of creating instance of LottieAnimation
+with LottieAnimation.from_data(data=data) as anim:
+    # Saving frame with save_frame
+    anim.save_frame('test4.png', frame_num=30)
+
+# Saving animation with save_animation
 with LottieAnimation.from_tgs(path=tgs_file) as anim:
-    # Saving animation with save_animation
-    anim.save_animation('test4.apng')
-    anim.save_animation('test5.gif')
-    anim.save_animation('test6.webp')
+    anim.save_animation('test5.apng')
+    anim.save_animation('test6.gif')
+    anim.save_animation('test7.webp')
