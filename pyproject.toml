@@ -27,4 +27,7 @@ source_path = "."
 build_args = ["-j"]
 install_components = ["python_module"]
 
+# stubgen depends on mypy, which depends on typed-ast
+# typed-ast cannot run on pypy <3.8
+# https://mypy.readthedocs.io/en/stable/faq.html
 # [tool.py-build-cmake.stubgen] # Whether and how to generate typed stub files

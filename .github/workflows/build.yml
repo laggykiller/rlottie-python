@@ -27,8 +27,8 @@ jobs:
         uses: pypa/cibuildwheel@v2.11.4
         env:
           CIBW_BUILD_FRONTEND: build
-          # Depends on mypy which reliles on typed-ast
-          # Cannot run on pypy <3.8
+          # If enable stubgen (pyproject.toml), then requires mypy which depends on typed-ast
+          # typed-ast cannot run on pypy <3.8
           # https://mypy.readthedocs.io/en/stable/faq.html
           # CIBW_SKIP: pp37-*
 
@@ -69,6 +69,6 @@ jobs:
       - uses: pypa/gh-action-pypi-publish@v1.5.0
         with:
           user: __token__
-          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
           # password: ${{ secrets.PYPI_API_TOKEN }}
-          # To test: repository_url: https://test.pypi.org/legacy/
+          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          repository_url: https://test.pypi.org/legacy/
