@@ -30,7 +30,7 @@ jobs:
           # Depends on mypy which reliles on typed-ast
           # Cannot run on pypy <3.8
           # https://mypy.readthedocs.io/en/stable/faq.html
-          CIBW_SKIP: pp37-*
+          # CIBW_SKIP: pp37-*
 
       - uses: actions/upload-artifact@v3
         with:

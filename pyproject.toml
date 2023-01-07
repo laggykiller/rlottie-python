@@ -27,4 +27,4 @@ source_path = "."
 build_args = ["-j"]
 install_components = ["python_module"]
 
-[tool.py-build-cmake.stubgen] # Whether and how to generate typed stub files
+# [tool.py-build-cmake.stubgen] # Whether and how to generate typed stub files
