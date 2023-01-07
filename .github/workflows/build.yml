@@ -1,14 +1,12 @@
-name: Building
+name: Build and upload to test PyPI
 
-# Build on every branch push, tag push, and pull request change:
-on: [push, pull_request]
-# Alternatively, to publish when a (published) GitHub Release is created, use the following:
-# on:
-#   push:
-#   pull_request:
-#   release:
-#     types:
-#       - published
+on:
+  push:
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+  release:
+    types:
+      - published
 
 jobs:
   build_wheels:
@@ -56,8 +54,6 @@ jobs:
     runs-on: ubuntu-latest
     # upload to PyPI on every tag starting with 'v'
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
-    # alternatively, to publish when a GitHub Release is created, use the following rule:
-    # if: github.event_name == 'release' && github.event.action == 'published'
     steps:
       - uses: actions/download-artifact@v3
         with:
@@ -75,9 +71,6 @@ jobs:
   upload_pypi:
     needs: [build_wheels, build_sdist]
     runs-on: ubuntu-latest
-    # upload to PyPI on every tag starting with 'v'
-    # if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
-    # alternatively, to publish when a GitHub Release is created, use the following rule:
     if: github.event_name == 'release' && github.event.action == 'published'
     steps:
       - uses: actions/download-artifact@v3
