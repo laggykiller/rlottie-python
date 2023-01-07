@@ -1,10 +1,47 @@
 # rlottie-python
 
-A ctypes API for rlottie, with additional functions for getting Pillow Image.
+A ctypes API for rlottie, with additional functions for getting Pillow Image and animated sequences, as well as telegram animated stickers (tgs).
 
 See example/example.py for example usage.
 
 The functions mostly follow [rlottie/inc/rlottie.h](https://github.com/Samsung/rlottie/blob/master/inc/rlottie.h)
+
+## Table of contents
+- [Installing](#installing)
+- [Building from source](#building-from-source)
+- [Examples](#examples)
+- [Comparing to other library](#comparing-to-other-library)
+- [Credits](#credits)
+
+## Installing
+
+Note that rlottie is included in the wheel package, you need not install librlottie.
+
+To install, run the following:
+```
+pip3 install wheel
+pip3 install rlottie-python
+```
+
+## Building from source
+
+To build wheel, run the following:
+```
+git clone --recursive https://github.com/laggykiller/rlottie-python.git
+cd rlottie-python
+pip3 install -r requirements.txt
+python3 -m build .
+```
+
+To install the built wheel, run `pip3 install dist/<name_of_the_wheel_file>.whl`
+
+If you want to install directly, run the following:
+```
+git clone --recursive https://github.com/laggykiller/rlottie-python.git
+cd rlottie-python
+pip3 install -r requirements.txt
+pip3 install .
+```
 
 ## Examples
 Getting information about an lottie animation
@@ -80,6 +117,11 @@ from rlottie_python import LottieAnimation
 with LottieAnimation.from_file('example/sample.json') as anim:
     anim.save_animation('animation4.apng')
 ```
+
+## Comparing to other library
+The `lottie` (https://pypi.org/project/lottie/) python package is also capable of working with lottie files and telegram animated stickers (tgs). It is also able to support many input/output formats and vector graphics, without any dependency on extenral libraries such as librlottie. However some images it creates is broken ([Example1](https://github.com/laggykiller/sticker-convert/issues/5) [Example2](https://gitlab.com/mattbas/python-lottie/-/issues/95)). It seems librlottie is more stable in terms of rendering frames.
+
+The `pyrlottie` (https://pypi.org/project/pyrlottie/) python package is also able to convert lottie and tgs files to webp/gif. However, it works by calling executables `gif2webp` and `lottie2gif` with subprocess, and it does not support macOS.
 
 ## Credits
 - rlottie library: https://github.com/Samsung/rlottie
