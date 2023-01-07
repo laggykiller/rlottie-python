@@ -6,9 +6,13 @@ license = { "file" = "LICENSE" }
 authors = [{ "name" = "chaudominic", "email" = "chaudominic2@gmail.com" }]
 keywords = ["rlottie", "lottie", "tgs", "ctypes"]
 classifiers = ["Topic :: Multimedia :: Graphics"]
-urls = { "Documentation" = "https://github.com/laggykiller/rlottie-python" }
 dependencies = ["Pillow"]
 dynamic = ["version", "description"]
+
+[project.urls]
+Source = "https://github.com/laggykiller/rlottie-python"
+Documentation = "https://github.com/laggykiller/rlottie-python"
+Tracker = "https://github.com/laggykiller/rlottie-python/issues"
 
 [build-system] # How pip and other frontends should build this project
 requires = ["py-build-cmake~=0.1.2"]
