@@ -1,5 +1,6 @@
 [project] # Project metadata
 name = "rlottie-python"
+description = "A ctypes API for rlottie, with additional functions for getting Pillow Image."
 requires-python = ">=3.7"
 readme = "README.md"
 license = { "file" = "LICENSE" }
@@ -7,7 +8,7 @@ authors = [{ "name" = "chaudominic", "email" = "chaudominic2@gmail.com" }]
 keywords = ["rlottie", "lottie", "tgs", "ctypes"]
 classifiers = ["Topic :: Multimedia :: Graphics"]
 dependencies = ["Pillow"]
-dynamic = ["version", "description"]
+dynamic = ["version"]
 
 [project.urls]
 Source = "https://github.com/laggykiller/rlottie-python"
