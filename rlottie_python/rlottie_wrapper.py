@@ -31,13 +31,13 @@ class LottieAnimationPointer(ctypes.c_void_p):
     pass
 
 class LottieAnimation:
-    rlottie_lib = None
-    animation_p = None
-    data_c = None
-    key_c = None
-    resource_path_abs_c = None
-
     def __init__(self, path: str='', data: str='', key_size: int=None, resource_path: str=''):
+        self.rlottie_lib = None
+        self.animation_p = None
+        self.data_c = None
+        self.key_c = None
+        self.resource_path_abs_c = None
+
         self.load_lib()
         self.lottie_init()
         self.lottie_configure_model_cache_size(0)
@@ -216,7 +216,7 @@ class LottieAnimation:
     
     def lottie_animation_get_size(self):
         '''
-        Returns total animation duration of Lottie resource in second.
+        Returns default viewport size of the Lottie resource.
         '''
         self.rlottie_lib.lottie_animation_get_size.argtypes = [LottieAnimationPointer, ctypes.POINTER(ctypes.c_size_t), ctypes.POINTER(ctypes.c_size_t)]
         self.rlottie_lib.lottie_animation_get_size.restype = ctypes.c_void_p
@@ -234,7 +234,7 @@ class LottieAnimation:
     
     def lottie_animation_get_duration(self):
         '''
-        Returns total number of frames present in the Lottie resource.
+        Returns total animation duration of Lottie resource in second.
         '''
         self.rlottie_lib.lottie_animation_get_duration.argtypes = [LottieAnimationPointer]
         self.rlottie_lib.lottie_animation_get_duration.restype = ctypes.c_double
@@ -290,7 +290,7 @@ class LottieAnimation:
 
         return render_tree
     
-    def lottie_animation_get_frame_at_pos(self, pos: int):
+    def lottie_animation_get_frame_at_pos(self, pos: float):
         '''
         Maps position to frame number and returns it.
 
@@ -298,10 +298,10 @@ class LottieAnimation:
         pos: position in the range [ 0.0 .. 1.0 ].
 
         OUTPUT:
-        mapped frame numbe in the range [ start_frame .. end_frame ].
+        mapped frame number in the range [ start_frame .. end_frame ].
         0 if the Lottie resource has no animation.
         '''
-        self.rlottie_lib.lottie_animation_get_frame_at_pos.argtypes = [LottieAnimationPointer, ctypes.POINTER(ctypes.c_float)]
+        self.rlottie_lib.lottie_animation_get_frame_at_pos.argtypes = [LottieAnimationPointer, ctypes.c_float]
         self.rlottie_lib.lottie_animation_get_frame_at_pos.restype = ctypes.c_size_t
 
         mapped_frame = self.rlottie_lib.lottie_animation_get_frame_at_pos(self.animation_p, ctypes.c_float(pos))
@@ -531,39 +531,38 @@ class LottieAnimation:
         OUTPUT:
         im: rendered Pillow Image
         '''
-        if frame_num_start == None or frame_num_end == None:
-            frame_num_start = 0
-            frame_num_end = self.lottie_animation_get_totalframe()
-
         fps_orig = self.lottie_animation_get_framerate()
-        duration_orig = 1000 / fps_orig
+        duration = self.lottie_animation_get_duration()
 
-        if fps:
-            duration = 1000 / fps
-        else:
-            duration = 1000 / fps_orig
+        export_ext = os.path.splitext(save_path)[-1].lower()
+
+        if not fps:
+            fps = fps_orig
     
             # For .gif, maximum framerate is capped at 50
             # Users may override this by specifying fps, at risk of breaking their gif
             # Reference: https://wunkolo.github.io/post/2020/02/buttery-smooth-10fps/
-            if os.path.splitext(save_path)[-1].lower() == '.gif' and fps_orig > 50:
-                duration = 1000 / 50
-            
-        if os.path.splitext(save_path)[-1].lower() == '.gif' and kwargs.get('disposal') == None:
+            if export_ext == '.gif' and fps_orig > 50:
+                fps = 50
+        
+        if export_ext == '.gif' and kwargs.get('disposal') == None:
             kwargs['disposal'] = 2
         
         if kwargs.get('loop') == None:
             kwargs['loop'] = 0
         
+        frames = int(duration * fps)
+        frame_duration = 1000 / fps
+
+        if frame_num_start == None:
+            frame_num_start = 0
+        if frame_num_end == None:
+            frame_num_end = frames
+
         im_list = []
-        for frame_num in range(frame_num_start, frame_num_end):
-            im_list.append(self.render_pillow_frame(frame_num=frame_num, buffer_size=buffer_size, width=width, height=height, bytes_per_line=bytes_per_line))
+        for frame in range(frame_num_start, frame_num_end):
+            pos = frame / frame_num_end
+            frame_num = self.lottie_animation_get_frame_at_pos(pos)
+            im_list.append(self.render_pillow_frame(frame_num=frame_num, buffer_size=buffer_size, width=width, height=height, bytes_per_line=bytes_per_line).copy())
 
-        im_list_mapped = []
-        time_start = frame_num_start * duration_orig # Starting time in ms
-        time_end = frame_num_end * duration_orig # Ending time in ms
-        for i in frange(time_start, time_end, duration):
-            j = min(round((i - time_start) / duration_orig), frame_num_end)
-            im_list_mapped.append(im_list[j])
-
-        im_list_mapped[0].save(save_path, save_all=True, append_images=im_list_mapped[1:], duration=int(duration), *args, **kwargs)
+        im_list[0].save(save_path, save_all=True, append_images=im_list[1:], duration=int(frame_duration), *args, **kwargs)
