@@ -11,9 +11,11 @@ dependencies = ["Pillow"]
 dynamic = ["version"]
 
 [project.urls]
+homepage = "https://github.com/laggykiller/rlottie-python"
 Source = "https://github.com/laggykiller/rlottie-python"
 Documentation = "https://github.com/laggykiller/rlottie-python"
 Tracker = "https://github.com/laggykiller/rlottie-python/issues"
+repository = "https://github.com/laggykiller/rlottie-python"
 
 [build-system] # How pip and other frontends should build this project
 requires = ["py-build-cmake~=0.1.2"]
