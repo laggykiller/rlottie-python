@@ -25,7 +25,7 @@ jobs:
         uses: laggykiller/cibuildwheel@v2.14.1-win-arm64
         env:
           CIBW_BUILD_FRONTEND: build
-          CIBW_ARCHS_WINDOWS: ARM64 # AMD64 x86 commented out for testing purposes
+          CIBW_ARCHS_WINDOWS: AMD64 x86 ARM64
           CIBW_ARCHS_MACOS: x86_64 universal2 arm64
           CIBW_ARCHS_LINUX: x86_64 i686 aarch64 ppc64le s390x
           # If enable stubgen (pyproject.toml), then requires mypy which depends on typed-ast
