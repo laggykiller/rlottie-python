@@ -22,7 +22,7 @@ jobs:
           submodules: recursive
 
       - name: Build wheels
-        uses: laggykiller/cibuildwheel@latest
+        uses: laggykiller/cibuildwheel@master
         env:
           CIBW_BUILD_FRONTEND: build
           CIBW_ARCHS_WINDOWS: ARM64 # AMD64 x86 commented out for testing purposes
