@@ -25,6 +25,9 @@ jobs:
         uses: pypa/cibuildwheel@v2.11.4
         env:
           CIBW_BUILD_FRONTEND: build
+          CIBW_ARCHS_WINDOWS: AMD64 x86 ARM64
+          CIBW_ARCHS_MACOS: x86_64 universal2 arm64
+          CIBW_ARCHS_LINUX: x86_64 i686 aarch64 ppc64le s390x
           # If enable stubgen (pyproject.toml), then requires mypy which depends on typed-ast
           # typed-ast cannot run on pypy <3.8
           # https://mypy.readthedocs.io/en/stable/faq.html
