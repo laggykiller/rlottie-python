@@ -9,7 +9,7 @@ on:
       - published
 
 jobs:
-  build_wheels_x86:
+  build_wheels_win:
     name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -25,9 +25,7 @@ jobs:
         uses: laggykiller/cibuildwheel@v2.14.1-win-arm64
         env:
           CIBW_BUILD_FRONTEND: build
-          CIBW_ARCHS_WINDOWS: AMD64 x86
-          CIBW_ARCHS_MACOS: x86_64
-          CIBW_ARCHS_LINUX: x86_64 i686
+          CIBW_ARCHS_WINDOWS: AMD64 x86 ARM64
           # If enable stubgen (pyproject.toml), then requires mypy which depends on typed-ast
           # typed-ast cannot run on pypy <3.8
           # https://mypy.readthedocs.io/en/stable/faq.html
@@ -37,7 +35,7 @@ jobs:
         with:
           path: ./wheelhouse/*.whl
   
-  build_wheels_arm:
+  build_wheels_mac:
     name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -53,9 +51,7 @@ jobs:
         uses: laggykiller/cibuildwheel@v2.14.1-win-arm64
         env:
           CIBW_BUILD_FRONTEND: build
-          CIBW_ARCHS_WINDOWS: ARM64
-          CIBW_ARCHS_MACOS: universal2 arm64
-          CIBW_ARCHS_LINUX: aarch64
+          CIBW_ARCHS_MACOS: x86_64 universal2 arm64
           # If enable stubgen (pyproject.toml), then requires mypy which depends on typed-ast
           # typed-ast cannot run on pypy <3.8
           # https://mypy.readthedocs.io/en/stable/faq.html
@@ -65,7 +61,7 @@ jobs:
         with:
           path: ./wheelhouse/*.whl
   
-  build_wheels_ppc64le:
+  build_wheels_linux_arm:
     name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -81,7 +77,7 @@ jobs:
         uses: laggykiller/cibuildwheel@v2.14.1-win-arm64
         env:
           CIBW_BUILD_FRONTEND: build
-          CIBW_ARCHS_LINUX: ppc64le
+          CIBW_ARCHS_LINUX: x86_64 i686 aarch64
           # If enable stubgen (pyproject.toml), then requires mypy which depends on typed-ast
           # typed-ast cannot run on pypy <3.8
           # https://mypy.readthedocs.io/en/stable/faq.html
@@ -90,8 +86,8 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           path: ./wheelhouse/*.whl
-  
-  build_wheels_s390x:
+
+  build_wheels_linux_ppc64le:
     name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -107,7 +103,33 @@ jobs:
         uses: laggykiller/cibuildwheel@v2.14.1-win-arm64
         env:
           CIBW_BUILD_FRONTEND: build
-          CIBW_ARCHS_LINUX: s390x
+          CIBW_ARCHS_LINUX: x86_64 ppc64le
+          # If enable stubgen (pyproject.toml), then requires mypy which depends on typed-ast
+          # typed-ast cannot run on pypy <3.8
+          # https://mypy.readthedocs.io/en/stable/faq.html
+          # CIBW_SKIP: pp37-*
+
+      - uses: actions/upload-artifact@v3
+        with:
+          path: ./wheelhouse/*.whl
+  
+  build_wheels_linux_s390x:
+    name: Build wheels on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-20.04]
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Build wheels
+        uses: laggykiller/cibuildwheel@v2.14.1-win-arm64
+        env:
+          CIBW_BUILD_FRONTEND: build
+          CIBW_ARCHS_LINUX: x86_64 s390x
           # If enable stubgen (pyproject.toml), then requires mypy which depends on typed-ast
           # typed-ast cannot run on pypy <3.8
           # https://mypy.readthedocs.io/en/stable/faq.html
