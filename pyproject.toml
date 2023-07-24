@@ -18,7 +18,7 @@ Tracker = "https://github.com/laggykiller/rlottie-python/issues"
 repository = "https://github.com/laggykiller/rlottie-python"
 
 [build-system] # How pip and other frontends should build this project
-requires = ["py-build-cmake~=0.1.2"]
+requires = ["py-build-cmake @ git+https://github.com/laggykiller/py-build-cmake.git@main"]
 build-backend = "py_build_cmake.build"
 
 [tool.py-build-cmake.module] # Where to find the Python module to package
