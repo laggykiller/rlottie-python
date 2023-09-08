@@ -1,4 +1,4 @@
-rlottie_python
+API references
 ==============
 
 .. toctree::

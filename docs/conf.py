@@ -18,9 +18,10 @@ author = 'laggykiller'
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
-    'sphinx.ext.autodoc',	     # To generate autodocs
-    'sphinx.ext.mathjax',           # autodoc with maths
-    'sphinx.ext.napoleon'           # For auto-doc configuration
+    'sphinx.ext.autodoc',
+    'sphinx.ext.mathjax',
+    'sphinx.ext.napoleon',
+    'myst_parser'
 ]
 
 napoleon_google_docstring = False

@@ -12,13 +12,13 @@ rlottie\_python.rlottie\_wrapper module
    :undoc-members:
    :show-inheritance:
 
-rlottie\_python.rlottiecommon module
-------------------------------------
+.. rlottie\_python.rlottiecommon module
+.. ------------------------------------
 
-.. automodule:: rlottie_python.rlottiecommon
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. .. automodule:: rlottie_python.rlottiecommon
+..    :members:
+..    :undoc-members:
+..    :show-inheritance:
 
 Module contents
 ---------------
