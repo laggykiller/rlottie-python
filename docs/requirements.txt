@@ -1,2 +1,3 @@
 Pillow
 myst-parser
+sphinx_immaterial
