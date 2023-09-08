@@ -1,5 +1,5 @@
-## Compare to lottie
+# Compare to lottie
 The `lottie` (https://pypi.org/project/lottie/) python package is also capable of working with lottie files and telegram animated stickers (tgs). It is also able to support many input/output formats and vector graphics, without any dependency on extenral libraries such as librlottie. However some images it creates is broken ([Example1](https://github.com/laggykiller/sticker-convert/issues/5) [Example2](https://gitlab.com/mattbas/python-lottie/-/issues/95)). It seems librlottie is more stable in terms of rendering frames.
 
-## Compare to pyrlottie
+# Compare to pyrlottie
 The `pyrlottie` (https://pypi.org/project/pyrlottie/) python package is also able to convert lottie and tgs files to webp/gif. However, it works by calling executables `gif2webp` and `lottie2gif` with subprocess, and it does not support macOS.

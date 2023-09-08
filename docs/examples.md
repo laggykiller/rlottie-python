@@ -1,5 +1,4 @@
-Examples
-==============
+# Examples
 
 Getting information about an lottie animation
 ```python

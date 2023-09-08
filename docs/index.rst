@@ -17,11 +17,3 @@ rlottie-python is a ctypes API for rlottie, with additional functions for gettin
    examples
    credits
    modules
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
