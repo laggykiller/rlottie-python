@@ -2,13 +2,16 @@ import os
 import sys
 import ctypes
 import gzip
+from typing import TypeVar, Tuple, Optional
 
 from PIL import Image
 from .rlottiecommon import LOTLayerNode, LOTMarkerList
 
 # References: rlottie/inc/rlottie.h
 
-def frange(start, stop=None, step=None):
+TLottieAnimation = TypeVar("TLottieAnimation", bound="LottieAnimation")
+
+def frange(start, stop: Optional[float] = None, step: Optional[float] = None):
     # if set start=0.0 and step = 1.0 if not specified
     start = float(start)
     if stop == None:
@@ -31,14 +34,14 @@ class LottieAnimationPointer(ctypes.c_void_p):
     pass
 
 class LottieAnimation:
-    def __init__(self, path: str='', data: str='', key_size: int=None, resource_path: str=''):
+    def __init__(self, path: str = '', data: str = '', key_size: Optional[int] = None, resource_path: str = ''):
         self.rlottie_lib = None
         self.animation_p = None
         self.data_c = None
         self.key_c = None
         self.resource_path_abs_c = None
 
-        self.load_lib()
+        self._load_lib()
         self.lottie_init()
         self.lottie_configure_model_cache_size(0)
 
@@ -47,7 +50,7 @@ class LottieAnimation:
         else:
             self.lottie_animation_from_data(data=data, key_size=key_size, resource_path=resource_path)
         
-    def load_lib(self):
+    def _load_lib(self):
         if sys.platform.startswith('win32') or sys.platform.startswith('cygwin'):
             rlottie_lib_name = 'rlottie.dll'
         elif sys.platform.startswith('darwin'):
@@ -79,7 +82,7 @@ class LottieAnimation:
         self.lottie_animation_destroy()
     
     @classmethod
-    def from_file(cls, path: str):
+    def from_file(cls, path: str) -> TLottieAnimation:
         '''
         Constructs LottieAnimation object from lottie file path.
 
@@ -91,7 +94,7 @@ class LottieAnimation:
         return cls(path=path)
     
     @classmethod
-    def from_data(cls, data: str, key_size: int=None, resource_path: str=''):
+    def from_data(cls, data: str, key_size: Optional[int] = None, resource_path: str = '') -> TLottieAnimation:
         '''
         Constructs LottieAnimation object from JSON string data.
 
@@ -105,7 +108,7 @@ class LottieAnimation:
         return cls(data=data, key_size=key_size, resource_path=resource_path)
     
     @classmethod
-    def from_tgs(cls, path: str):
+    def from_tgs(cls, path: str) -> TLottieAnimation:
         '''
         Constructs LottieAnimation object from tgs file path.
 
@@ -165,7 +168,7 @@ class LottieAnimation:
 
         del path_p
     
-    def lottie_animation_from_data(self, data: str, key_size: int=None, resource_path: str=''):
+    def lottie_animation_from_data(self, data: str, key_size: Optional[int] = None, resource_path: str = ''):
         '''
         Constructs an animation object from JSON string data.
 
@@ -218,7 +221,7 @@ class LottieAnimation:
             del self.resource_path_abs_c
             self.resource_path_abs_c = None
     
-    def lottie_animation_get_size(self):
+    def lottie_animation_get_size(self) -> Tuple[int, int]:
         '''
         Returns default viewport size of the Lottie resource.
 
@@ -239,7 +242,7 @@ class LottieAnimation:
 
         return width, height
     
-    def lottie_animation_get_duration(self):
+    def lottie_animation_get_duration(self) -> int:
         '''
         Returns total animation duration of Lottie resource in second.
 
@@ -252,7 +255,7 @@ class LottieAnimation:
         duration = self.rlottie_lib.lottie_animation_get_duration(self.animation_p)
         return duration
     
-    def lottie_animation_get_totalframe(self):
+    def lottie_animation_get_totalframe(self) -> int:
         '''
         Returns total number of frames present in the Lottie resource.
 
@@ -263,7 +266,7 @@ class LottieAnimation:
 
         return totalframe
     
-    def lottie_animation_get_framerate(self):
+    def lottie_animation_get_framerate(self) -> int:
         '''
         Returns default framerate of the Lottie resource.
 
@@ -277,7 +280,7 @@ class LottieAnimation:
 
         return framerate
     
-    def lottie_animation_render_tree(self, frame_num: int=0, width: int=None, height: int=None):
+    def lottie_animation_render_tree(self, frame_num: int = 0, width: Optional[int] = None, height: Optional[int] = None) -> LOTLayerNode:
         '''
         Get the render tree which contains the snapshot of the animation object
         at frame = @c frame_num, the content of the animation in that frame number.
@@ -305,7 +308,7 @@ class LottieAnimation:
 
         return render_tree
     
-    def lottie_animation_get_frame_at_pos(self, pos: float):
+    def lottie_animation_get_frame_at_pos(self, pos: float) -> int:
         '''
         Maps position to frame number and returns it.
 
@@ -321,7 +324,7 @@ class LottieAnimation:
         
         return mapped_frame
     
-    def lottie_animation_render(self, frame_num: int=0, buffer_size: int=None, width: int=None, height: int=None, bytes_per_line: int=None):
+    def lottie_animation_render(self, frame_num: int = 0, buffer_size: Optional[int] = None, width: Optional[int] = None, height: Optional[int] = None, bytes_per_line: Optional[int] = None) -> bytes:
         '''
         Request to render the content of the frame frame_num to buffer.
 
@@ -356,7 +359,7 @@ class LottieAnimation:
 
         return buffer
     
-    def lottie_animation_render_async(self, frame_num: int=0, buffer_size: int=None, width: int=None, height: int=None, bytes_per_line: int=None):
+    def lottie_animation_render_async(self, frame_num: int = 0, buffer_size: Optional[int] = None, width: Optional[int] = None, height: Optional[int] = None, bytes_per_line: Optional[int] = None) -> bytes:
         '''
         Request to render the content of the frame frame_num to buffer asynchronously.
         user must call lottie_animation_render_flush() to make sure render is finished.
@@ -386,7 +389,7 @@ class LottieAnimation:
 
         return buffer_c.raw
 
-    def lottie_animation_render_flush(self):
+    def lottie_animation_render_flush(self) -> bytes:
         '''
         Request to finish the current async renderer job for this animation object.
         If render is finished then this call returns immidiately.
@@ -440,7 +443,7 @@ class LottieAnimation:
 
         self.rlottie_lib.lottie_animation_property_override(self.animation_p, ctypes.c_int(_type_index), ctypes.c_char_p(keypath), *args)
     
-    def lottie_animation_get_markerlist(self):
+    def lottie_animation_get_markerlist(self) -> Optional[list]:
         '''
         Returns list of markers in the Lottie resource
         LOTMarkerList has a LOTMarker list and size of list
@@ -475,7 +478,7 @@ class LottieAnimation:
         self.rlottie_lib.lottie_configure_model_cache_size.restype = ctypes.c_void_p
         self.rlottie_lib.lottie_configure_model_cache_size(ctypes.c_size_t(cache_size))
     
-    def render_pillow_frame(self, frame_num: int=0, buffer_size: int=None, width: int=None, height: int=None, bytes_per_line: int=None):
+    def render_pillow_frame(self, frame_num: int = 0, buffer_size: Optional[int] = None, width: Optional[int] = None, height: Optional[int] = None, bytes_per_line: Optional[int] = None) -> Image:
         '''
         Create Pillow Image at frame_num
 
@@ -497,7 +500,7 @@ class LottieAnimation:
 
         return im
     
-    def save_frame(self, save_path: str, frame_num: int=0, buffer_size: int=None, width: int=None, height: int=None, bytes_per_line: int=None, *args, **kwargs):
+    def save_frame(self, save_path: str, frame_num: int = 0, buffer_size: Optional[int] = None, width: Optional[int] = None, height: Optional[int] = None, bytes_per_line: Optional[int] = None, *args, **kwargs) -> Image:
         '''
         Save Image at frame_num to save_path
 
@@ -516,7 +519,7 @@ class LottieAnimation:
         im = self.render_pillow_frame(frame_num=frame_num, buffer_size=buffer_size, width=width, height=height, bytes_per_line=bytes_per_line)
         im.save(save_path, *args, **kwargs)
     
-    def save_animation(self, save_path:str, fps: int=0, frame_num_start: int=None, frame_num_end: int=None, buffer_size: int=None, width: int=None, height: int=None, bytes_per_line: int=None, *args, **kwargs):
+    def save_animation(self, save_path:str, fps: int = 0, frame_num_start: Optional[int] = None, frame_num_end: Optional[int] = None, buffer_size: Optional[int] = None, width: Optional[int] = None, height: Optional[int] = None, bytes_per_line: Optional[int] = None, *args, **kwargs) -> Image:
         '''
         Save Image from frame_num_start to frame_num_end and save it to save_path
         It is possible to save animation as apng, gif or webp
