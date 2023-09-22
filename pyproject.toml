@@ -27,10 +27,24 @@ directory = "."
 include = ["CMakeLists.txt", "rlottie/*"]
 
 [tool.py-build-cmake.cmake] # How to build the CMake project
-build_type = "RelWithDebInfo"
+build_type = "Release"
 source_path = "."
 build_args = ["-j"]
 install_components = ["python_module"]
+python_abi = 'abi3'
+abi3_minimum_cpython_version = 312
+
+[tool.py-build-cmake.linux.cmake] # Linux-specific options
+generator = "Ninja Multi-Config"
+config = "Release"
+env = { "CMAKE_PREFIX_PATH" = "${HOME}/.local" }
+
+[tool.py-build-cmake.mac.cmake] # macOS-specific options
+generator = "Ninja Multi-Config"
+config = "Release"
+
+[tool.py-build-cmake.windows.cmake] # Windows-specific options
+config = "Release"
 
 # stubgen depends on mypy, which depends on typed-ast
 # typed-ast cannot run on pypy <3.8
