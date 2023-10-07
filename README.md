@@ -25,6 +25,11 @@ pip3 install wheel
 pip3 install rlottie-python
 ```
 
+Optionally, install `Pillow`:
+```
+pip3 install Pillow
+```
+
 ## Building from source
 
 To build wheel, run the following:

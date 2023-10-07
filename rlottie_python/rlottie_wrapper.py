@@ -10,10 +10,6 @@ try:
 
     PILLOW_LOADED = True
 except ModuleNotFoundError:
-
-    class Image:
-        pass
-
     PILLOW_LOADED = False
 from .rlottiecommon import LOTLayerNode, LOTMarkerList
 
@@ -659,173 +655,166 @@ class LottieAnimation:
         self.rlottie_lib.lottie_configure_model_cache_size.restype = ctypes.c_void_p
         self.rlottie_lib.lottie_configure_model_cache_size(ctypes.c_size_t(cache_size))
 
-    def render_pillow_frame(
-        self,
-        frame_num: int = 0,
-        buffer_size: Optional[int] = None,
-        width: Optional[int] = None,
-        height: Optional[int] = None,
-        bytes_per_line: Optional[int] = None,
-    ) -> Image:
-        """
-        Create Pillow Image at frame_num
+    if PILLOW_LOADED:
 
-        :param int frame_num: the frame number needs to be rendered.
-            Defaults to 0.
-        :param Optional[int] buffer_size: size of surface buffer use for rendering
-        :param Optional[int] width: width of the surface
-        :param Optional[int] height: height of the surface
-        :param Optional[int] bytes_per_line: stride of the surface in bytes.
+        def render_pillow_frame(
+            self,
+            frame_num: int = 0,
+            buffer_size: Optional[int] = None,
+            width: Optional[int] = None,
+            height: Optional[int] = None,
+            bytes_per_line: Optional[int] = None,
+        ) -> Image.Image:
+            """
+            Create Pillow Image at frame_num
 
-        :return: rendered Pillow Image
-        :rtype: PIL.Image.Image
-        """
-        if not PILLOW_LOADED:
-            raise ModuleNotFoundError("Pillow is required for this function.")
+            :param int frame_num: the frame number needs to be rendered.
+                Defaults to 0.
+            :param Optional[int] buffer_size: size of surface buffer use for rendering
+            :param Optional[int] width: width of the surface
+            :param Optional[int] height: height of the surface
+            :param Optional[int] bytes_per_line: stride of the surface in bytes.
 
-        if width == None or height == None:
-            width, height = self.lottie_animation_get_size()
+            :return: rendered Pillow Image
+            :rtype: PIL.Image.Image
+            """
+            if width == None or height == None:
+                width, height = self.lottie_animation_get_size()
 
-        buffer = self.lottie_animation_render(
-            frame_num=frame_num,
-            buffer_size=buffer_size,
-            width=width,
-            height=height,
-            bytes_per_line=bytes_per_line,
-        )
-
-        im = Image.frombuffer("RGBA", (width, height), buffer, "raw", "BGRA")
-
-        return im
-
-    def save_frame(
-        self,
-        save_path: str,
-        frame_num: int = 0,
-        buffer_size: Optional[int] = None,
-        width: Optional[int] = None,
-        height: Optional[int] = None,
-        bytes_per_line: Optional[int] = None,
-        *args,
-        **kwargs,
-    ) -> Image:
-        """
-        Save Image at frame_num to save_path
-
-        :param str save_path: path to save the Pillow Image
-        :param int frame_num: the frame number needs to be rendered.
-            Defaults to 0.
-        :param Optional[int] buffer_size: size of surface buffer use for rendering
-        :param Optional[int] width: width of the surface
-        :param Optional[int] height: height of the surface
-        :param Optional[int] bytes_per_line: stride of the surface in bytes.
-        :param *args: additional arguments passing to im.save()
-        :param **kwargs: additional arguments passing to im.save()
-
-        :return: rendered Pillow Image
-        :rtype: PIL.Image.Image
-        """
-        if not PILLOW_LOADED:
-            raise ModuleNotFoundError("Pillow is required for this function.")
-
-        im = self.render_pillow_frame(
-            frame_num=frame_num,
-            buffer_size=buffer_size,
-            width=width,
-            height=height,
-            bytes_per_line=bytes_per_line,
-        )
-        im.save(save_path, *args, **kwargs)
-
-    def save_animation(
-        self,
-        save_path: str,
-        fps: Optional[int] = None,
-        frame_num_start: Optional[int] = None,
-        frame_num_end: Optional[int] = None,
-        buffer_size: Optional[int] = None,
-        width: Optional[int] = None,
-        height: Optional[int] = None,
-        bytes_per_line: Optional[int] = None,
-        *args,
-        **kwargs,
-    ) -> Image:
-        """
-        Save Image from frame_num_start to frame_num_end and save it to save_path.
-
-        It is possible to save animation as apng, gif or webp.
-
-        For .gif, maximum framerate is capped at 50.
-
-        Users may override this by specifying fps, at risk of breaking their gif.
-
-        :param str save_path: Path to save the Pillow Image
-        :param Optional[int] fps: Set fps of output image.
-            Will skip frames if lower than original.
-        :param Optional[int] frame_num_start: the starting frame number
-            needs to be rendered.
-        :param Optional[int] frame_num_end: the ending frame number
-            needs to be rendered.
-        :param Optional[int] buffer_size: size of surface buffer use for rendering
-        :param Optional[int] width: width of the surface
-        :param Optional[int] height: height of the surface
-        :param Optional[int] bytes_per_line: stride of the surface in bytes.
-        :param *args: additional arguments passing to im.save()
-        :param **kwargs: additional arguments passing to im.save()
-
-        :return: rendered Pillow Image
-        :rtype: PIL.Image.Image
-        """
-        if not PILLOW_LOADED:
-            raise ModuleNotFoundError("Pillow is required for this function.")
-
-        fps_orig = self.lottie_animation_get_framerate()
-        duration = self.lottie_animation_get_duration()
-
-        export_ext = os.path.splitext(save_path)[-1].lower()
-
-        if not fps:
-            fps = fps_orig
-
-            # For .gif, maximum framerate is capped at 50
-            # Users may override this by specifying fps, at risk of breaking their gif
-            # Reference: https://wunkolo.github.io/post/2020/02/buttery-smooth-10fps/
-            if export_ext == ".gif" and fps_orig > 50:
-                fps = 50
-
-        if export_ext == ".gif" and kwargs.get("disposal") == None:
-            kwargs["disposal"] = 2
-
-        if kwargs.get("loop") == None:
-            kwargs["loop"] = 0
-
-        frames = int(duration * fps)
-        frame_duration = 1000 / fps
-
-        if frame_num_start == None:
-            frame_num_start = 0
-        if frame_num_end == None:
-            frame_num_end = frames
-
-        im_list = []
-        for frame in range(frame_num_start, frame_num_end):
-            pos = frame / frame_num_end
-            frame_num = self.lottie_animation_get_frame_at_pos(pos)
-            im_list.append(
-                self.render_pillow_frame(
-                    frame_num=frame_num,
-                    buffer_size=buffer_size,
-                    width=width,
-                    height=height,
-                    bytes_per_line=bytes_per_line,
-                ).copy()
+            buffer = self.lottie_animation_render(
+                frame_num=frame_num,
+                buffer_size=buffer_size,
+                width=width,
+                height=height,
+                bytes_per_line=bytes_per_line,
             )
 
-        im_list[0].save(
-            save_path,
-            save_all=True,
-            append_images=im_list[1:],
-            duration=int(frame_duration),
+            im = Image.frombuffer("RGBA", (width, height), buffer, "raw", "BGRA")
+
+            return im
+
+        def save_frame(
+            self,
+            save_path: str,
+            frame_num: int = 0,
+            buffer_size: Optional[int] = None,
+            width: Optional[int] = None,
+            height: Optional[int] = None,
+            bytes_per_line: Optional[int] = None,
             *args,
             **kwargs,
-        )
+        ) -> Image.Image:
+            """
+            Save Image at frame_num to save_path
+
+            :param str save_path: path to save the Pillow Image
+            :param int frame_num: the frame number needs to be rendered.
+                Defaults to 0.
+            :param Optional[int] buffer_size: size of surface buffer use for rendering
+            :param Optional[int] width: width of the surface
+            :param Optional[int] height: height of the surface
+            :param Optional[int] bytes_per_line: stride of the surface in bytes.
+            :param *args: additional arguments passing to im.save()
+            :param **kwargs: additional arguments passing to im.save()
+
+            :return: rendered Pillow Image
+            :rtype: PIL.Image.Image
+            """
+            im = self.render_pillow_frame(
+                frame_num=frame_num,
+                buffer_size=buffer_size,
+                width=width,
+                height=height,
+                bytes_per_line=bytes_per_line,
+            )
+            im.save(save_path, *args, **kwargs)
+
+        def save_animation(
+            self,
+            save_path: str,
+            fps: Optional[int] = None,
+            frame_num_start: Optional[int] = None,
+            frame_num_end: Optional[int] = None,
+            buffer_size: Optional[int] = None,
+            width: Optional[int] = None,
+            height: Optional[int] = None,
+            bytes_per_line: Optional[int] = None,
+            *args,
+            **kwargs,
+        ) -> Image.Image:
+            """
+            Save Image from frame_num_start to frame_num_end and save it to save_path.
+
+            It is possible to save animation as apng, gif or webp.
+
+            For .gif, maximum framerate is capped at 50.
+
+            Users may override this by specifying fps, at risk of breaking their gif.
+
+            :param str save_path: Path to save the Pillow Image
+            :param Optional[int] fps: Set fps of output image.
+                Will skip frames if lower than original.
+            :param Optional[int] frame_num_start: the starting frame number
+                needs to be rendered.
+            :param Optional[int] frame_num_end: the ending frame number
+                needs to be rendered.
+            :param Optional[int] buffer_size: size of surface buffer use for rendering
+            :param Optional[int] width: width of the surface
+            :param Optional[int] height: height of the surface
+            :param Optional[int] bytes_per_line: stride of the surface in bytes.
+            :param *args: additional arguments passing to im.save()
+            :param **kwargs: additional arguments passing to im.save()
+
+            :return: rendered Pillow Image
+            :rtype: PIL.Image.Image
+            """
+            fps_orig = self.lottie_animation_get_framerate()
+            duration = self.lottie_animation_get_duration()
+
+            export_ext = os.path.splitext(save_path)[-1].lower()
+
+            if not fps:
+                fps = fps_orig
+
+                # For .gif, maximum framerate is capped at 50
+                # Users may override this by specifying fps, at risk of breaking their gif
+                # Reference: https://wunkolo.github.io/post/2020/02/buttery-smooth-10fps/
+                if export_ext == ".gif" and fps_orig > 50:
+                    fps = 50
+
+            if export_ext == ".gif" and kwargs.get("disposal") == None:
+                kwargs["disposal"] = 2
+
+            if kwargs.get("loop") == None:
+                kwargs["loop"] = 0
+
+            frames = int(duration * fps)
+            frame_duration = 1000 / fps
+
+            if frame_num_start == None:
+                frame_num_start = 0
+            if frame_num_end == None:
+                frame_num_end = frames
+
+            im_list = []
+            for frame in range(frame_num_start, frame_num_end):
+                pos = frame / frame_num_end
+                frame_num = self.lottie_animation_get_frame_at_pos(pos)
+                im_list.append(
+                    self.render_pillow_frame(
+                        frame_num=frame_num,
+                        buffer_size=buffer_size,
+                        width=width,
+                        height=height,
+                        bytes_per_line=bytes_per_line,
+                    ).copy()
+                )
+
+            im_list[0].save(
+                save_path,
+                save_all=True,
+                append_images=im_list[1:],
+                duration=int(frame_duration),
+                *args,
+                **kwargs,
+            )
