@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from rlottie_python import LottieAnimation
 from PIL import Image
 
@@ -47,6 +48,14 @@ width, height = anim.lottie_animation_get_size()
 im = Image.frombuffer("RGBA", (width, height), buffer, "raw", "BGRA")
 im.save("test3.png")
 
+# Directly get buffer, async
+anim.lottie_animation_render_async(frame_num=50)
+# You may do other other tasks in between
+buffer = anim.lottie_animation_render_flush()
+width, height = anim.lottie_animation_get_size()
+im = Image.frombuffer("RGBA", (width, height), buffer, "raw", "BGRA")
+im.save("test4.png")
+
 # Loading JSON string with from_data()
 with open(json_file) as f:
     data = f.read()
@@ -54,10 +63,10 @@ with open(json_file) as f:
 # Alternative way of creating instance of LottieAnimation
 with LottieAnimation.from_data(data=data) as anim:
     # Saving frame with save_frame
-    anim.save_frame("test4.png", frame_num=30)
+    anim.save_frame("test5.png", frame_num=30)
 
 # Saving animation with save_animation
 with LottieAnimation.from_tgs(path=tgs_file) as anim:
-    anim.save_animation("test5.apng")
-    anim.save_animation("test6.gif")
-    anim.save_animation("test7.webp")
+    anim.save_animation("test6.apng")
+    anim.save_animation("test7.gif")
+    anim.save_animation("test8.webp")

@@ -1,10 +1,16 @@
+#!/usr/bin/env python3
 import os
 import sys
 import ctypes
 import gzip
 from typing import TypeVar, Tuple, Optional
 
-from PIL import Image
+try:
+    from PIL import Image
+
+    PILLOW_LOADED = True
+except ModuleNotFoundError:
+    PILLOW_LOADED = False
 from .rlottiecommon import LOTLayerNode, LOTMarkerList
 
 # References: rlottie/inc/rlottie.h
@@ -37,18 +43,20 @@ class LottieAnimationPointer(ctypes.c_void_p):
 
 
 class LottieAnimation:
+    rlottie_lib = None
+
     def __init__(
         self,
         path: str = "",
         data: str = "",
         key_size: Optional[int] = None,
-        resource_path: str = "",
+        resource_path: Optional[str] = None,
     ):
-        self.rlottie_lib = None
         self.animation_p = None
         self.data_c = None
         self.key_c = None
         self.resource_path_abs_c = None
+        self.async_buffer_c = None
 
         self._load_lib()
         self.lottie_init()
@@ -62,6 +70,9 @@ class LottieAnimation:
             )
 
     def _load_lib(self):
+        if self.rlottie_lib != None:
+            return
+
         if sys.platform.startswith("win32") or sys.platform.startswith("cygwin"):
             rlottie_lib_name = "rlottie.dll"
         elif sys.platform.startswith("darwin"):
@@ -86,13 +97,15 @@ class LottieAnimation:
             self.rlottie_lib = ctypes.CDLL(self.rlottie_lib_path)
 
     def __del__(self):
-        self.lottie_animation_destroy()
+        if self.rlottie_lib:
+            self.lottie_animation_destroy()
 
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.lottie_animation_destroy()
+        if self.rlottie_lib:
+            self.lottie_animation_destroy()
 
     @classmethod
     def from_file(cls, path: str) -> TLottieAnimation:
@@ -108,15 +121,18 @@ class LottieAnimation:
 
     @classmethod
     def from_data(
-        cls, data: str, key_size: Optional[int] = None, resource_path: str = ""
+        cls,
+        data: str,
+        key_size: Optional[int] = None,
+        resource_path: Optional[str] = None,
     ) -> TLottieAnimation:
         """
         Constructs LottieAnimation object from JSON string data.
 
         :param str data: the JSON string data.
-        :param int key_size: (optional) the string that will be used to
+        :param Optional[int] key_size: the string that will be used to
             cache the JSON string data.
-        :param str resource_path: (optional) the path that will be used to
+        :param Optional[str] resource_path: the path that will be used to
             load external resource needed by the JSON data.
 
         :return: LottieAnimation object
@@ -163,6 +179,8 @@ class LottieAnimation:
         self.rlottie_lib.lottie_shutdown.restype = ctypes.c_void_p
         self.rlottie_lib.lottie_shutdown()
 
+        self.rlottie_lib = None
+
     def lottie_animation_from_file(self, path: str):
         """
         Constructs an animation object from JSON file path.
@@ -187,7 +205,10 @@ class LottieAnimation:
         del path_p
 
     def lottie_animation_from_data(
-        self, data: str, key_size: Optional[int] = None, resource_path: str = ""
+        self,
+        data: str,
+        key_size: Optional[int] = None,
+        resource_path: Optional[str] = None,
     ):
         """
         Constructs an animation object from JSON string data.
@@ -196,9 +217,9 @@ class LottieAnimation:
             You should use from_data(data=data) instead
 
         :param str data: the JSON string data.
-        :param int key_size: (optional) the size of string that will be used to
+        :param Optional[int] key_size: the size of string that will be used to
             cache the JSON string data.
-        :param str resource_path: (optional) the path that will be used to
+        :param Optional[str] resource_path: the path that will be used to
             load external resource needed by the JSON data.
         """
         self.data_c = ctypes.create_string_buffer(data.encode())
@@ -209,7 +230,7 @@ class LottieAnimation:
         self.key_c = ctypes.create_string_buffer(key_size)
 
         resource_path_abs = ""
-        if resource_path != "":
+        if resource_path != None:
             resource_path_abs = os.path.abspath(resource_path)
         self.resource_path_abs_c = ctypes.create_string_buffer(
             resource_path_abs.encode()
@@ -260,7 +281,7 @@ class LottieAnimation:
         Returns default viewport size of the Lottie resource.
 
         :return: width, height
-        :rtype: int, int
+        :rtype: Tuple[int, int]
         """
         self.rlottie_lib.lottie_animation_get_size.argtypes = [
             LottieAnimationPointer,
@@ -336,10 +357,10 @@ class LottieAnimation:
 
         Example for getting content of render_tree: render_tree.mMaskList.size
 
-        :param int frame_num: (optional) Content corresponds to the frame_num needs
+        :param int frame_num: Content corresponds to the frame_num needs
             to be drawn. Defaults to 0.
-        :param int width: (optional) Requested snapshot viewport width.
-        :param int height: (optional) Requested snapshot viewport height.
+        :param Optional[int] width: Requested snapshot viewport width.
+        :param Optional[int] height: Requested snapshot viewport height.
 
         :return: animation snapshot tree.
         :rtype: rlottie_python.rlottiecommon.LOTLayerNode
@@ -403,12 +424,12 @@ class LottieAnimation:
         """
         Request to render the content of the frame frame_num to buffer.
 
-        :param int frame_num: (optional) the frame number needs to be rendered.
+        :param int frame_num: the frame number needs to be rendered.
             Defaults to 0.
-        :param int buffer_size: (optional) size of surface buffer use for rendering
-        :param int width: (optional) width of the surface
-        :param int height: (optional) height of the surface
-        :param int bytes_per_line: (optional) stride of the surface in bytes.
+        :param Optional[int] buffer_size: size of surface buffer use for rendering
+        :param Optional[int] width: width of the surface
+        :param Optional[int] height: height of the surface
+        :param Optional[int] bytes_per_line: stride of the surface in bytes.
 
         :return: rendered surface buffer
         :rtype: bytes
@@ -456,32 +477,19 @@ class LottieAnimation:
         width: Optional[int] = None,
         height: Optional[int] = None,
         bytes_per_line: Optional[int] = None,
-    ) -> bytes:
+    ):
         """
         Request to render the content of the frame frame_num to buffer asynchronously.
 
         User must call lottie_animation_render_flush() to make sure render is finished.
 
-        :param int frame_num: (optional) the frame number needs to be rendered.
+        :param int frame_num: the frame number needs to be rendered.
             Defaults to 0.
-        :param int buffer_size: (optional) size of surface buffer use for rendering
-        :param int width: (optional) width of the surface
-        :param int height: (optional) height of the surface
-        :param int bytes_per_line: (optional) stride of the surface in bytes.
-
-        :return: rendered surface buffer
-        :rtype: bytes
+        :param Optional[int] buffer_size: size of surface buffer use for rendering
+        :param Optional[int] width: width of the surface
+        :param Optional[int] height: height of the surface
+        :param Optional[int] bytes_per_line: stride of the surface in bytes.
         """
-        self.rlottie_lib.lottie_animation_render_async.argtypes = [
-            LottieAnimationPointer,
-            ctypes.c_size_t,
-            ctypes.POINTER(ctypes.c_uint32),
-            ctypes.c_size_t,
-            ctypes.c_size_t,
-            ctypes.c_size_t,
-        ]
-        self.rlottie_lib.lottie_animation_render_async.restype = ctypes.c_void_p
-
         if width == None or height == None:
             width, height = self.lottie_animation_get_size()
 
@@ -489,25 +497,35 @@ class LottieAnimation:
             bytes_per_line = width * 4
 
         if buffer_size == None:
-            buffer_c = ctypes.create_string_buffer(width * height * 4)
+            buffer_size = width * height * 4
+
+        self.async_buffer_c = ctypes.create_string_buffer(buffer_size)
+
+        self.rlottie_lib.lottie_animation_render_async.argtypes = [
+            LottieAnimationPointer,
+            ctypes.c_size_t,
+            ctypes.POINTER(ctypes.c_char * buffer_size),
+            ctypes.c_size_t,
+            ctypes.c_size_t,
+            ctypes.c_size_t,
+        ]
+        self.rlottie_lib.lottie_animation_render_async.restype = ctypes.c_void_p
 
         self.rlottie_lib.lottie_animation_render_async(
             self.animation_p,
             ctypes.c_size_t(frame_num),
-            ctypes.byref(buffer_c),
+            ctypes.byref(self.async_buffer_c),
             ctypes.c_size_t(width),
             ctypes.c_size_t(height),
             ctypes.c_size_t(bytes_per_line),
         )
-
-        return buffer_c.raw
 
     def lottie_animation_render_flush(self) -> bytes:
         """
         Request to finish the current async renderer job for this animation object.
 
         If render is finished then this call returns immidiately.
-        
+
         If not, it waits till render job finish and then return.
 
         User must call lottie_animation_render_async()
@@ -517,18 +535,19 @@ class LottieAnimation:
         :return: the pixel buffer it finised rendering
         :rtype: bytes
         """
+        if not self.async_buffer_c:
+            raise AttributeError(
+                "Nothing was rendered using lottie_animation_render_async()"
+            )
+
         self.rlottie_lib.lottie_animation_get_duration.argtypes = [
             LottieAnimationPointer
         ]
         self.rlottie_lib.lottie_animation_get_duration.restype = ctypes.c_uint32
 
-        buffer_c = self.rlottie_lib.lottie_animation_render_flush(self.animation_p)
+        self.rlottie_lib.lottie_animation_render_flush(self.animation_p)
 
-        buffer = buffer_c.raw
-
-        del buffer_c
-
-        return buffer
+        return self.async_buffer_c
 
     def lottie_animation_property_override(self, _type: str, keypath: str, *args):
         """
@@ -554,39 +573,30 @@ class LottieAnimation:
             # Color property of Fill object
             # value type is float [0 ... 1]
             "LOTTIE_ANIMATION_PROPERTY_FILLCOLOR",
-
             # Opacity property of Fill object
             # value type is float [ 0 .. 100]
             "LOTTIE_ANIMATION_PROPERTY_FILLOPACITY",
-
             # Color property of Stroke object
             # value type is float [0 ... 1]
             "LOTTIE_ANIMATION_PROPERTY_STROKECOLOR",
-
             # Opacity property of Stroke object
             # value type is float [ 0 .. 100]
             "LOTTIE_ANIMATION_PROPERTY_STROKEOPACITY",
-
             # stroke with property of Stroke object
             # value type is float
             "LOTTIE_ANIMATION_PROPERTY_STROKEWIDTH",
-
             # Transform Anchor property of Layer and Group object
             # value type is int
             "LOTTIE_ANIMATION_PROPERTY_TR_ANCHOR",
-
             # Transform Position property of Layer and Group object
             # value type is int
             "LOTTIE_ANIMATION_PROPERTY_TR_POSITION",
-
             # Transform Scale property of Layer and Group object
             # value type is float range[0 ..100]
             "LOTTIE_ANIMATION_PROPERTY_TR_SCALE",
-
             # Transform Scale property of Layer and Group object
             # value type is float. range[0 .. 360] in degrees
             "LOTTIE_ANIMATION_PROPERTY_TR_ROTATION",
-
             # Transform Opacity property of Layer and Group object
             # value type is float [ 0 .. 100]
             "LOTTIE_ANIMATION_PROPERTY_TR_OPACITY",
@@ -612,7 +622,7 @@ class LottieAnimation:
         Example for getting content of markerlist: markerlist.ptr.name
 
         :return: The list of marker. If there is no marker, return None
-        :rtype: list or None
+        :rtype: Optional[list]
         """
         self.rlottie_lib.lottie_animation_get_markerlist.argtypes = [
             LottieAnimationPointer
@@ -630,7 +640,7 @@ class LottieAnimation:
         Configures rlottie model cache policy.
 
         Provides Library level control to configure model cache policy.
-        
+
         Setting it to 0 will disable
         the cache as well as flush all the previously cached content.
 
@@ -656,16 +666,19 @@ class LottieAnimation:
         """
         Create Pillow Image at frame_num
 
-        :param int frame_num: (optional) the frame number needs to be rendered.
+        :param int frame_num: the frame number needs to be rendered.
             Defaults to 0.
-        :param int buffer_size: (optional) size of surface buffer use for rendering
-        :param int width: (optional) width of the surface
-        :param int height: (optional) height of the surface
-        :param int bytes_per_line: (optional) stride of the surface in bytes.
+        :param Optional[int] buffer_size: size of surface buffer use for rendering
+        :param Optional[int] width: width of the surface
+        :param Optional[int] height: height of the surface
+        :param Optional[int] bytes_per_line: stride of the surface in bytes.
 
         :return: rendered Pillow Image
         :rtype: PIL.Image.Image
         """
+        if not PILLOW_LOADED:
+            raise ModuleNotFoundError("Pillow is required for this function.")
+
         if width == None or height == None:
             width, height = self.lottie_animation_get_size()
 
@@ -696,18 +709,21 @@ class LottieAnimation:
         Save Image at frame_num to save_path
 
         :param str save_path: path to save the Pillow Image
-        :param int frame_num: (optional) the frame number needs to be rendered.
+        :param int frame_num: the frame number needs to be rendered.
             Defaults to 0.
-        :param int buffer_size: (optional) size of surface buffer use for rendering
-        :param int width: (optional) width of the surface
-        :param int height: (optional) height of the surface
-        :param int bytes_per_line: (optional): stride of the surface in bytes.
-        :param *args: (optional) additional arguments passing to im.save()
-        :param **kwargs: (optional) additional arguments passing to im.save()
+        :param Optional[int] buffer_size: size of surface buffer use for rendering
+        :param Optional[int] width: width of the surface
+        :param Optional[int] height: height of the surface
+        :param Optional[int] bytes_per_line: stride of the surface in bytes.
+        :param *args: additional arguments passing to im.save()
+        :param **kwargs: additional arguments passing to im.save()
 
         :return: rendered Pillow Image
         :rtype: PIL.Image.Image
         """
+        if not PILLOW_LOADED:
+            raise ModuleNotFoundError("Pillow is required for this function.")
+
         im = self.render_pillow_frame(
             frame_num=frame_num,
             buffer_size=buffer_size,
@@ -720,7 +736,7 @@ class LottieAnimation:
     def save_animation(
         self,
         save_path: str,
-        fps: int = 0,
+        fps: Optional[int] = None,
         frame_num_start: Optional[int] = None,
         frame_num_end: Optional[int] = None,
         buffer_size: Optional[int] = None,
@@ -741,7 +757,7 @@ class LottieAnimation:
 
         :param str save_path: Path to save the Pillow Image
         :param Optional[int] fps: Set fps of output image.
-            Will skip frames if lower than original
+            Will skip frames if lower than original.
         :param Optional[int] frame_num_start: the starting frame number
             needs to be rendered.
         :param Optional[int] frame_num_end: the ending frame number
@@ -756,6 +772,9 @@ class LottieAnimation:
         :return: rendered Pillow Image
         :rtype: PIL.Image.Image
         """
+        if not PILLOW_LOADED:
+            raise ModuleNotFoundError("Pillow is required for this function.")
+
         fps_orig = self.lottie_animation_get_framerate()
         duration = self.lottie_animation_get_duration()
 
