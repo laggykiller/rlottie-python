@@ -10,6 +10,10 @@ try:
 
     PILLOW_LOADED = True
 except ModuleNotFoundError:
+
+    class Image:
+        pass
+
     PILLOW_LOADED = False
 from .rlottiecommon import LOTLayerNode, LOTMarkerList
 

@@ -7,7 +7,7 @@ license = { "file" = "LICENSE" }
 authors = [{ "name" = "chaudominic", "email" = "chaudominic2@gmail.com" }]
 keywords = ["rlottie", "lottie", "tgs", "ctypes"]
 classifiers = ["Topic :: Multimedia :: Graphics"]
-dependencies = ["Pillow"]
+dependencies = []
 dynamic = ["version"]
 
 [project.urls]
