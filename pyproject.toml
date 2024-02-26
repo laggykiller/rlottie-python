@@ -35,12 +35,10 @@ python_abi = 'abi3'
 abi3_minimum_cpython_version = 312
 
 [tool.py-build-cmake.linux.cmake] # Linux-specific options
-generator = "Ninja Multi-Config"
 config = "Release"
 env = { "CMAKE_PREFIX_PATH" = "${HOME}/.local" }
 
 [tool.py-build-cmake.mac.cmake] # macOS-specific options
-generator = "Ninja Multi-Config"
 config = "Release"
 
 [tool.py-build-cmake.windows.cmake] # Windows-specific options
