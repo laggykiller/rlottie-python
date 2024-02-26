@@ -90,10 +90,6 @@ jobs:
           CIBW_BEFORE_TEST: pip install --only-binary ":all:" Pillow; true
           CIBW_BEFORE_TEST_WINDOWS: pip install --only-binary ":all:" Pillow || VER>NUL
           CIBW_TEST_COMMAND: pytest {package}/tests
-          # If enable stubgen (pyproject.toml), then requires mypy which depends on typed-ast
-          # typed-ast cannot run on pypy <3.8
-          # https://mypy.readthedocs.io/en/stable/faq.html
-          # CIBW_SKIP: pp37-*
 
       - uses: actions/upload-artifact@v3
         with:
