@@ -87,9 +87,11 @@ jobs:
           CIBW_ARCHS_MACOS: ${{ matrix.cibw_archs_macos }}
           CIBW_ARCHS_LINUX: ${{ matrix.cibw_archs_linux }}
           CIBW_TEST_REQUIRES: pytest
-          CIBW_BEFORE_TEST: pip install --prefer-binary Pillow
+          CIBW_BEFORE_TEST_WINDOWS: pip install --only-binary ":all:" Pillow || VER>NUL
+          CIBW_BEFORE_TEST_MACOS: pip install --only-binary ":all:" Pillow 2>/dev/null
+          CIBW_BEFORE_TEST_LINUX: pip install --only-binary ":all:" Pillow 2>/dev/null
           CIBW_TEST_COMMAND: pytest {package}/tests
-          CIBW_TEST_SKIP: "*-win32 *-*linux_{i686,ppc64le,s390x}"
+          CIBW_TEST_SKIP: "*-win32"
           # If enable stubgen (pyproject.toml), then requires mypy which depends on typed-ast
           # typed-ast cannot run on pypy <3.8
           # https://mypy.readthedocs.io/en/stable/faq.html
