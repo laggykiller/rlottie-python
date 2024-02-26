@@ -652,7 +652,7 @@ class LottieAnimation:
         width: Optional[int] = None,
         height: Optional[int] = None,
         bytes_per_line: Optional[int] = None,
-    ) -> Image.Image:
+    ) -> "Image.Image":
         """
         Create Pillow Image at frame_num
 
