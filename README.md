@@ -50,6 +50,12 @@ pip3 install -r requirements.txt
 pip3 install .
 ```
 
+To run tests:
+```bash
+pip install pytest
+pytest
+```
+
 ## Examples
 Getting information about an lottie animation
 ```python
