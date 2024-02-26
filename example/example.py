@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-from rlottie_python import LottieAnimation
+from pathlib import Path
 from PIL import Image
+from rlottie_python import LottieAnimation
 
-json_file = "sample.json"
-tgs_file = "sample.tgs"
+file_dir = Path(__file__).parent
+json_file = Path(file_dir, "../samples/sample.json").as_posix()
+tgs_file = Path(file_dir, "../samples/sample.tgs").as_posix()
 
 # Loading from json file
 anim = LottieAnimation.from_file(json_file)
