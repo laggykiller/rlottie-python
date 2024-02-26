@@ -22,8 +22,8 @@ jobs:
 
       - name: Test sdist
         run: |
-          python -m pip install dist/rlottie-python-*.tar.gz
-          pip install pytest &&
+          python -m pip install dist/rlottie_python-*.tar.gz
+          pip install pytest Pillow &&
           pytest
 
       - uses: actions/upload-artifact@v3
@@ -89,7 +89,7 @@ jobs:
           CIBW_ARCHS_WINDOWS: ${{ matrix.cibw_archs_windows }}
           CIBW_ARCHS_MACOS: ${{ matrix.cibw_archs_macos }}
           CIBW_ARCHS_LINUX: ${{ matrix.cibw_archs_linux }}
-          CIBW_TEST_REQUIRES: pytest
+          CIBW_TEST_REQUIRES: pytest Pillow
           CIBW_TEST_COMMAND: pytest {package}/tests
           # If enable stubgen (pyproject.toml), then requires mypy which depends on typed-ast
           # typed-ast cannot run on pypy <3.8
