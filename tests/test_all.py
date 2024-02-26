@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import ctypes
 from pathlib import Path
+import platform
 
 import pytest
 try:
@@ -26,14 +27,14 @@ def test_from_file_with():
         assert isinstance(anim, LottieAnimation)
 
 def test_from_data():
-    with open(json_file) as f:
+    with open(json_file, encoding="utf-8") as f:
         data = f.read()
 
     anim = LottieAnimation.from_data(data)
     assert isinstance(anim, LottieAnimation)
 
 def test_from_data_with():
-    with open(json_file) as f:
+    with open(json_file, encoding="utf-8") as f:
         data = f.read()
     
     with LottieAnimation.from_data(data) as anim:
@@ -132,14 +133,24 @@ def test_save_frame(tmpdir):
     assert Path(tmppath).is_file()
     Image.open(tmppath)
 
+def _test_save_animation(out):
+    with LottieAnimation.from_file(json_file) as anim:
+        anim.save_frame(out)
+
+    assert Path(out).is_file()
+
 @pytest.mark.skipif(PILLOW_LOADED is False, reason="Pillow not installed")
-def test_save_animation(tmpdir):
-    def _test_save_animation(out):
-        with LottieAnimation.from_file(json_file) as anim:
-            anim.save_frame(out)
+def test_save_animation_apng(tmpdir):
+    tmppath = Path(tmpdir, "0.apng").as_posix()
+    _test_save_animation(tmppath)
 
-        assert Path(out).is_file()
+@pytest.mark.skipif(PILLOW_LOADED is False, reason="Pillow not installed")
+def test_save_animation_gif(tmpdir):
+    tmppath = Path(tmpdir, "0.gif").as_posix()
+    _test_save_animation(tmppath)
 
-    for i in ("0.apng", "0.gif", "0.webp"):
-        tmppath = Path(tmpdir, i).as_posix()
-        _test_save_animation(tmppath)
+@pytest.mark.skipif(PILLOW_LOADED is False, reason="Pillow not installed")
+@pytest.mark.skipif(platform.python_implementation() == "PyPy", reason="Pillow without webp support")
+def test_save_animation_webp(tmpdir):
+    tmppath = Path(tmpdir, "0.webp").as_posix()
+    _test_save_animation(tmppath)

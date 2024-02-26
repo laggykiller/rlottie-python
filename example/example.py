@@ -59,7 +59,7 @@ im = Image.frombuffer("RGBA", (width, height), buffer, "raw", "BGRA")
 im.save("test4.png")
 
 # Loading JSON string with from_data()
-with open(json_file) as f:
+with open(json_file, encoding="utf-8") as f:
     data = f.read()
 
 # Alternative way of creating instance of LottieAnimation
