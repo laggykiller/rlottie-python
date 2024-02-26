@@ -2,7 +2,14 @@
 import ctypes
 from pathlib import Path
 
-from PIL import Image
+import pytest
+try:
+    from PIL import Image
+
+    PILLOW_LOADED = True
+except ModuleNotFoundError:
+    PILLOW_LOADED = False
+
 from rlottie_python import LottieAnimation
 from rlottie_python.rlottiecommon import LOTLayerNode
 
@@ -109,12 +116,14 @@ def test_lottie_configure_model_cache_size():
     with LottieAnimation.from_file(json_file) as anim:
         anim.lottie_configure_model_cache_size(0)
 
+@pytest.mark.skipif(PILLOW_LOADED is False, reason="Pillow not installed")
 def test_render_pillow_frame():
     with LottieAnimation.from_file(json_file) as anim:
         im = anim.render_pillow_frame()
 
         assert isinstance(im, Image.Image)
-    
+
+@pytest.mark.skipif(PILLOW_LOADED is False, reason="Pillow not installed")
 def test_save_frame(tmpdir):
     tmppath = Path(tmpdir, "0.png").as_posix()
     with LottieAnimation.from_file(json_file) as anim:
@@ -123,13 +132,14 @@ def test_save_frame(tmpdir):
     assert Path(tmppath).is_file()
     Image.open(tmppath)
 
-def _test_save_animation(out):
-    with LottieAnimation.from_file(json_file) as anim:
-        anim.save_frame(out)
-
-    assert Path(out).is_file()
-
+@pytest.mark.skipif(PILLOW_LOADED is False, reason="Pillow not installed")
 def test_save_animation(tmpdir):
+    def _test_save_animation(out):
+        with LottieAnimation.from_file(json_file) as anim:
+            anim.save_frame(out)
+
+        assert Path(out).is_file()
+
     for i in ("0.apng", "0.gif", "0.webp"):
         tmppath = Path(tmpdir, i).as_posix()
         _test_save_animation(tmppath)
