@@ -126,31 +126,31 @@ def test_render_pillow_frame():
 
 @pytest.mark.skipif(PILLOW_LOADED is False, reason="Pillow not installed")
 def test_save_frame(tmpdir):
-    tmppath = Path(tmpdir, "0.png").as_posix()
+    tmppath = os.path.join(tmpdir, "0.png")
     with LottieAnimation.from_file(json_file) as anim:
         anim.save_frame(tmppath)
 
-    assert Path(tmppath).is_file()
+    assert os.path.isfile(tmppath)
     Image.open(tmppath)
 
 def _test_save_animation(out):
     with LottieAnimation.from_file(json_file) as anim:
         anim.save_frame(out)
 
-    assert Path(out).is_file()
+    assert os.path.isfile(out)
 
 @pytest.mark.skipif(PILLOW_LOADED is False, reason="Pillow not installed")
 def test_save_animation_apng(tmpdir):
-    tmppath = Path(tmpdir, "0.apng").as_posix()
+    tmppath = os.path.join(tmpdir, "0.apng")
     _test_save_animation(tmppath)
 
 @pytest.mark.skipif(PILLOW_LOADED is False, reason="Pillow not installed")
 def test_save_animation_gif(tmpdir):
-    tmppath = Path(tmpdir, "0.gif").as_posix()
+    tmppath = os.path.join(tmpdir, "0.gif")
     _test_save_animation(tmppath)
 
 @pytest.mark.skipif(PILLOW_LOADED is False, reason="Pillow not installed")
 @pytest.mark.skipif(platform.python_implementation() == "PyPy", reason="Pillow without webp support")
 def test_save_animation_webp(tmpdir):
-    tmppath = Path(tmpdir, "0.webp").as_posix()
+    tmppath = os.path.join(tmpdir, "0.webp")
     _test_save_animation(tmppath)
