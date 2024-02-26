@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import ctypes
-from pathlib import Path
+import os
 import platform
 
 import pytest
@@ -14,9 +14,9 @@ except ModuleNotFoundError:
 from rlottie_python import LottieAnimation
 from rlottie_python.rlottiecommon import LOTLayerNode
 
-file_dir = Path(__file__).parent
-json_file = Path(file_dir, "../samples/sample.json").as_posix()
-tgs_file = Path(file_dir, "../samples/sample.tgs").as_posix()
+file_dir = os.path.split(__file__)[0]
+json_file = os.path.join(file_dir, "../samples/sample.json")
+tgs_file = os.path.join(file_dir, "../samples/sample.tgs")
 
 def test_from_file():
     anim = LottieAnimation.from_file(json_file)
