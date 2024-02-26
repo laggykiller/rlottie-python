@@ -3,7 +3,7 @@ import os
 import sys
 import ctypes
 import gzip
-from typing import TypeVar, Tuple, Optional
+from typing import Tuple, Optional
 
 try:
     from PIL import Image
@@ -15,16 +15,14 @@ from .rlottiecommon import LOTLayerNode, LOTMarkerList
 
 # References: rlottie/inc/rlottie.h
 
-TLottieAnimation = TypeVar("TLottieAnimation", bound="LottieAnimation")
-
 
 def frange(start, stop: Optional[float] = None, step: Optional[float] = None):
     # if set start=0.0 and step = 1.0 if not specified
     start = float(start)
-    if stop == None:
+    if stop is None:
         stop = start + 0.0
         start = 0.0
-    if step == None:
+    if step is None:
         step = 1.0
 
     count = 0
@@ -43,8 +41,6 @@ class LottieAnimationPointer(ctypes.c_void_p):
 
 
 class LottieAnimation:
-    rlottie_lib = None
-
     def __init__(
         self,
         path: str = "",
@@ -70,9 +66,6 @@ class LottieAnimation:
             )
 
     def _load_lib(self):
-        if self.rlottie_lib != None:
-            return
-
         if sys.platform.startswith("win32") or sys.platform.startswith("cygwin"):
             rlottie_lib_name = "rlottie.dll"
         elif sys.platform.startswith("darwin"):
@@ -108,7 +101,7 @@ class LottieAnimation:
             self.lottie_animation_destroy()
 
     @classmethod
-    def from_file(cls, path: str) -> TLottieAnimation:
+    def from_file(cls, path: str) -> "LottieAnimation":
         """
         Constructs LottieAnimation object from lottie file path.
 
@@ -125,7 +118,7 @@ class LottieAnimation:
         data: str,
         key_size: Optional[int] = None,
         resource_path: Optional[str] = None,
-    ) -> TLottieAnimation:
+    ) -> "LottieAnimation":
         """
         Constructs LottieAnimation object from JSON string data.
 
@@ -141,7 +134,7 @@ class LottieAnimation:
         return cls(data=data, key_size=key_size, resource_path=resource_path)
 
     @classmethod
-    def from_tgs(cls, path: str) -> TLottieAnimation:
+    def from_tgs(cls, path: str) -> "LottieAnimation":
         """
         Constructs LottieAnimation object from tgs file path.
 
@@ -178,8 +171,6 @@ class LottieAnimation:
         self.rlottie_lib.lottie_shutdown.argtypes = []
         self.rlottie_lib.lottie_shutdown.restype = ctypes.c_void_p
         self.rlottie_lib.lottie_shutdown()
-
-        self.rlottie_lib = None
 
     def lottie_animation_from_file(self, path: str):
         """
@@ -225,12 +216,12 @@ class LottieAnimation:
         self.data_c = ctypes.create_string_buffer(data.encode())
         data_size = ctypes.sizeof(self.data_c)
 
-        if key_size == None:
+        if key_size is None:
             key_size = data_size
         self.key_c = ctypes.create_string_buffer(key_size)
 
         resource_path_abs = ""
-        if resource_path != None:
+        if resource_path is not None:
             resource_path_abs = os.path.abspath(resource_path)
         self.resource_path_abs_c = ctypes.create_string_buffer(
             resource_path_abs.encode()
@@ -375,7 +366,7 @@ class LottieAnimation:
             LOTLayerNode
         )
 
-        if width == None or height == None:
+        if width is None or height is None:
             width, height = self.lottie_animation_get_size()
 
         render_tree_p = self.rlottie_lib.lottie_animation_render_tree(
@@ -434,13 +425,13 @@ class LottieAnimation:
         :return: rendered surface buffer
         :rtype: bytes
         """
-        if width == None or height == None:
+        if width is None or height is None:
             width, height = self.lottie_animation_get_size()
 
-        if bytes_per_line == None:
+        if bytes_per_line is None:
             bytes_per_line = width * 4
 
-        if buffer_size == None:
+        if buffer_size is None:
             buffer_size = width * height * 4
 
         buffer_c = ctypes.create_string_buffer(buffer_size)
@@ -490,13 +481,13 @@ class LottieAnimation:
         :param Optional[int] height: height of the surface
         :param Optional[int] bytes_per_line: stride of the surface in bytes.
         """
-        if width == None or height == None:
+        if width is None or height is None:
             width, height = self.lottie_animation_get_size()
 
-        if bytes_per_line == None:
+        if bytes_per_line is None:
             bytes_per_line = width * 4
 
-        if buffer_size == None:
+        if buffer_size is None:
             buffer_size = width * height * 4
 
         self.async_buffer_c = ctypes.create_string_buffer(buffer_size)
@@ -547,7 +538,7 @@ class LottieAnimation:
 
         self.rlottie_lib.lottie_animation_render_flush(self.animation_p)
 
-        return self.async_buffer_c
+        return bytes(self.async_buffer_c)
 
     def lottie_animation_property_override(self, _type: str, keypath: str, *args):
         """
@@ -560,9 +551,9 @@ class LottieAnimation:
         lottie_animation_property_override(
         "LOTTIE_ANIMATION_PROPERTY_FILLCOLOR",
         "layer1.group1.fill1",
-        ctypes.float(1.0),
-        ctypes.float(0.0),
-        ctypes.float(0.0)
+        ctypes.c_float(1.0),
+        ctypes.c_float(0.0),
+        ctypes.c_float(0.0)
         )
 
         :param str _type: Property type.
@@ -608,7 +599,10 @@ class LottieAnimation:
             raise IndexError("Invalid _type")
 
         self.rlottie_lib.lottie_animation_property_override(
-            self.animation_p, ctypes.c_int(_type_index), ctypes.c_char_p(keypath), *args
+            self.animation_p,
+            ctypes.c_int(_type_index),
+            ctypes.c_wchar_p(keypath),
+            *args,
         )
 
     def lottie_animation_get_markerlist(self) -> Optional[list]:
@@ -633,7 +627,10 @@ class LottieAnimation:
 
         markerlist = self.rlottie_lib.lottie_animation_get_markerlist(self.animation_p)
 
-        return markerlist.contents
+        try:
+            return markerlist.contents
+        except ValueError: # NULL pointer access
+            return None
 
     def lottie_configure_model_cache_size(self, cache_size: int):
         """
@@ -678,7 +675,7 @@ class LottieAnimation:
             :return: rendered Pillow Image
             :rtype: PIL.Image.Image
             """
-            if width == None or height == None:
+            if width is None or height is None:
                 width, height = self.lottie_animation_get_size()
 
             buffer = self.lottie_animation_render(
@@ -703,7 +700,7 @@ class LottieAnimation:
             bytes_per_line: Optional[int] = None,
             *args,
             **kwargs,
-        ) -> Image.Image:
+        ):
             """
             Save Image at frame_num to save_path
 
@@ -718,7 +715,6 @@ class LottieAnimation:
             :param **kwargs: additional arguments passing to im.save()
 
             :return: rendered Pillow Image
-            :rtype: PIL.Image.Image
             """
             im = self.render_pillow_frame(
                 frame_num=frame_num,
@@ -741,7 +737,7 @@ class LottieAnimation:
             bytes_per_line: Optional[int] = None,
             *args,
             **kwargs,
-        ) -> Image.Image:
+        ):
             """
             Save Image from frame_num_start to frame_num_end and save it to save_path.
 
@@ -766,7 +762,6 @@ class LottieAnimation:
             :param **kwargs: additional arguments passing to im.save()
 
             :return: rendered Pillow Image
-            :rtype: PIL.Image.Image
             """
             fps_orig = self.lottie_animation_get_framerate()
             duration = self.lottie_animation_get_duration()
@@ -782,18 +777,18 @@ class LottieAnimation:
                 if export_ext == ".gif" and fps_orig > 50:
                     fps = 50
 
-            if export_ext == ".gif" and kwargs.get("disposal") == None:
+            if export_ext == ".gif" and kwargs.get("disposal") is None:
                 kwargs["disposal"] = 2
 
-            if kwargs.get("loop") == None:
+            if kwargs.get("loop") is None:
                 kwargs["loop"] = 0
 
             frames = int(duration * fps)
             frame_duration = 1000 / fps
 
-            if frame_num_start == None:
+            if frame_num_start is None:
                 frame_num_start = 0
-            if frame_num_end == None:
+            if frame_num_end is None:
                 frame_num_end = frames
 
             im_list = []
