@@ -2,6 +2,7 @@
 import ctypes
 import os
 import platform
+from tempfile import TemporaryDirectory
 
 import pytest
 try:
@@ -125,13 +126,14 @@ def test_render_pillow_frame():
         assert isinstance(im, Image.Image)
 
 @pytest.mark.skipif(PILLOW_LOADED is False, reason="Pillow not installed")
-def test_save_frame(tmpdir):
-    tmppath = os.path.join(tmpdir, "0.png")
-    with LottieAnimation.from_file(json_file) as anim:
-        anim.save_frame(tmppath)
+def test_save_frame():
+    with TemporaryDirectory() as tmpdir:
+        tmppath = os.path.join(tmpdir, "0.png")
+        with LottieAnimation.from_file(json_file) as anim:
+            anim.save_frame(tmppath)
 
-    assert os.path.isfile(tmppath)
-    Image.open(tmppath)
+        assert os.path.isfile(tmppath)
+        Image.open(tmppath)
 
 def _test_save_animation(out):
     with LottieAnimation.from_file(json_file) as anim:
@@ -140,17 +142,20 @@ def _test_save_animation(out):
     assert os.path.isfile(out)
 
 @pytest.mark.skipif(PILLOW_LOADED is False, reason="Pillow not installed")
-def test_save_animation_apng(tmpdir):
-    tmppath = os.path.join(tmpdir, "0.apng")
-    _test_save_animation(tmppath)
+def test_save_animation_apng():
+    with TemporaryDirectory() as tmpdir:
+        tmppath = os.path.join(tmpdir, "0.apng")
+        _test_save_animation(tmppath)
 
 @pytest.mark.skipif(PILLOW_LOADED is False, reason="Pillow not installed")
-def test_save_animation_gif(tmpdir):
-    tmppath = os.path.join(tmpdir, "0.gif")
-    _test_save_animation(tmppath)
+def test_save_animation_gif():
+    with TemporaryDirectory() as tmpdir:
+        tmppath = os.path.join(tmpdir, "0.gif")
+        _test_save_animation(tmppath)
 
 @pytest.mark.skipif(PILLOW_LOADED is False, reason="Pillow not installed")
 @pytest.mark.skipif(platform.python_implementation() == "PyPy", reason="Pillow without webp support")
-def test_save_animation_webp(tmpdir):
-    tmppath = os.path.join(tmpdir, "0.webp")
-    _test_save_animation(tmppath)
+def test_save_animation_webp():
+    with TemporaryDirectory() as tmpdir:
+        tmppath = os.path.join(tmpdir, "0.webp")
+        _test_save_animation(tmppath)
