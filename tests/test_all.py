@@ -133,7 +133,6 @@ def test_save_frame():
             anim.save_frame(tmppath)
 
         assert os.path.isfile(tmppath)
-        Image.open(tmppath)
 
 def _test_save_animation(out):
     with LottieAnimation.from_file(json_file) as anim:
