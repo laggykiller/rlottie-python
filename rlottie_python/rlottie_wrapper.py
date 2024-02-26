@@ -84,10 +84,7 @@ class LottieAnimation:
         else:
             self.rlottie_lib_path = rlottie_lib_name
 
-        if sys.platform.startswith("win32") or sys.platform.startswith("cygwin"):
-            self.rlottie_lib = ctypes.WinDLL(self.rlottie_lib_path)
-        else:
-            self.rlottie_lib = ctypes.CDLL(self.rlottie_lib_path)
+        self.rlottie_lib = ctypes.CDLL(self.rlottie_lib_path)
 
     def __del__(self):
         if self.rlottie_lib:
