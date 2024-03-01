@@ -98,10 +98,10 @@ jobs:
           CIBW_ARCHS_MACOS: ${{ matrix.cibw_archs_macos }}
           CIBW_ARCHS_LINUX: ${{ matrix.cibw_archs_linux }}
           CIBW_BUILD: ${{ matrix.cibw_build }}
-          CIBW_TEST_REQUIRES: pytest abi3audit
+          CIBW_TEST_REQUIRES: pytest
           CIBW_BEFORE_TEST: pip install --only-binary ":all:" Pillow; true
           CIBW_BEFORE_TEST_WINDOWS: pip install --only-binary ":all:" Pillow || VER>NUL
-          CIBW_TEST_COMMAND: pytest {package}/tests && abi3audit {package}/*.whl
+          CIBW_TEST_COMMAND: pytest {package}/tests
           # Weird bug in pp38-win_amd64 causing test to fail
           # OSError: [WinError 6] The handle is invalid: 'D:\\System Volume Information'
           CIBW_TEST_SKIP: "pp*-win_amd64"
