@@ -3,7 +3,8 @@ import os
 import sys
 import ctypes
 import gzip
-from typing import Tuple, Optional, TYPE_CHECKING
+from typing import Any, Tuple, Union, Optional, Type, TYPE_CHECKING
+from types import TracebackType
 
 if TYPE_CHECKING:
     from PIL import Image
@@ -12,7 +13,7 @@ from .rlottiecommon import LOTLayerNode, LOTMarkerList
 # References: rlottie/inc/rlottie.h
 
 
-def frange(start, stop: Optional[float] = None, step: Optional[float] = None):
+def frange(start: float, stop: Optional[float] = None, step: Optional[float] = None):
     # if set start=0.0 and step = 1.0 if not specified
     start = float(start)
     if stop is None:
@@ -43,6 +44,7 @@ class LottieAnimation:
         data: str = "",
         key_size: Optional[int] = None,
         resource_path: Optional[str] = None,
+        rlottie_lib_path: Optional[str] = None,
     ):
         self.animation_p = None
         self.data_c = None
@@ -50,7 +52,7 @@ class LottieAnimation:
         self.resource_path_abs_c = None
         self.async_buffer_c = None
 
-        self._load_lib()
+        self._load_lib(rlottie_lib_path)
         self.lottie_init()
         self.lottie_configure_model_cache_size(0)
 
@@ -61,26 +63,50 @@ class LottieAnimation:
                 data=data, key_size=key_size, resource_path=resource_path
             )
 
-    def _load_lib(self):
+    def _load_lib(self, rlottie_lib_path: Optional[str] = None):
+        if rlottie_lib_path:
+            self.rlottie_lib_path = rlottie_lib_path
+
+            try:
+                self.rlottie_lib = ctypes.CDLL(self.rlottie_lib_path)
+            except OSError:
+                raise OSError(
+                    "Unable to load rlottie library at: " + self.rlottie_lib_path
+                )
+
+            return None
+
         if sys.platform.startswith("win32") or sys.platform.startswith("cygwin"):
-            rlottie_lib_name = "rlottie.dll"
+            lib_suffix = ".dll"
+            lib_prefixes = ("", "lib")
         elif sys.platform.startswith("darwin"):
-            rlottie_lib_name = "librlottie.dylib"
+            lib_suffix = ".dylib"
+            lib_prefixes = ("lib", "")
         else:
-            rlottie_lib_name = "librlottie.so"
+            lib_suffix = ".so"
+            lib_prefixes = ("lib", "")
 
-        rlottie_lib_path_local = os.path.join(
-            os.path.dirname(__file__), rlottie_lib_name
-        )
+        package_dir = os.path.dirname(__file__)
 
-        if os.path.isfile(rlottie_lib_path_local):
-            self.rlottie_lib_path = rlottie_lib_path_local
-        elif os.path.isfile(rlottie_lib_name):
-            self.rlottie_lib_path = os.path.abspath(rlottie_lib_name)
-        else:
-            self.rlottie_lib_path = rlottie_lib_name
+        attempted_lib_paths: "list[str]" = []
+        for lib_prefix in lib_prefixes:
+            rlottie_lib_name = lib_prefix + "rlottie" + lib_suffix
+            rlottie_lib_path_local = os.path.join(package_dir, rlottie_lib_name)
 
-        self.rlottie_lib = ctypes.CDLL(self.rlottie_lib_path)
+            if os.path.isfile(rlottie_lib_path_local):
+                self.rlottie_lib_path = rlottie_lib_path_local
+            elif os.path.isfile(rlottie_lib_name):
+                self.rlottie_lib_path = os.path.abspath(rlottie_lib_name)
+            else:
+                self.rlottie_lib_path = rlottie_lib_name
+
+            try:
+                self.rlottie_lib = ctypes.CDLL(self.rlottie_lib_path)
+                return None
+            except OSError:
+                attempted_lib_paths.append(self.rlottie_lib_path)
+
+        raise OSError("Unable to load rlottie library at: " + str(attempted_lib_paths))
 
     def __del__(self):
         if self.rlottie_lib:
@@ -89,21 +115,30 @@ class LottieAnimation:
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ):
         if self.rlottie_lib:
             self.lottie_animation_destroy()
 
     @classmethod
-    def from_file(cls, path: str) -> "LottieAnimation":
+    def from_file(
+        cls, path: str, rlottie_lib_path: Optional[str] = None
+    ) -> "LottieAnimation":
         """
         Constructs LottieAnimation object from lottie file path.
 
         :param str path: lottie resource file path
+        :param Optional[str] rlottie_lib_path: Optionally specific where the rlottie
+            library is located
 
         :return: LottieAnimation object
         :rtype: LottieAnimation
         """
-        return cls(path=path)
+        return cls(path=path, rlottie_lib_path=rlottie_lib_path)
 
     @classmethod
     def from_data(
@@ -111,6 +146,7 @@ class LottieAnimation:
         data: str,
         key_size: Optional[int] = None,
         resource_path: Optional[str] = None,
+        rlottie_lib_path: Optional[str] = None,
     ) -> "LottieAnimation":
         """
         Constructs LottieAnimation object from JSON string data.
@@ -120,25 +156,36 @@ class LottieAnimation:
             cache the JSON string data.
         :param Optional[str] resource_path: the path that will be used to
             load external resource needed by the JSON data.
+        :param Optional[str] rlottie_lib_path: Optionally specific where the rlottie
+            library is located
 
         :return: LottieAnimation object
         :rtype: LottieAnimation
         """
-        return cls(data=data, key_size=key_size, resource_path=resource_path)
+        return cls(
+            data=data,
+            key_size=key_size,
+            resource_path=resource_path,
+            rlottie_lib_path=rlottie_lib_path,
+        )
 
     @classmethod
-    def from_tgs(cls, path: str) -> "LottieAnimation":
+    def from_tgs(
+        cls, path: str, rlottie_lib_path: Optional[str] = None
+    ) -> "LottieAnimation":
         """
         Constructs LottieAnimation object from tgs file path.
 
         :param str path: tgs resource file path
+        :param Optional[str] rlottie_lib_path: Optionally specific where the rlottie
+            library is located
 
         :return: LottieAnimation object
         :rtype: LottieAnimation
         """
         with gzip.open(path) as f:
             data = f.read().decode(encoding="utf-8")
-        return cls(data=data)
+        return cls(data=data, rlottie_lib_path=rlottie_lib_path)
 
     def lottie_init(self):
         """
@@ -533,7 +580,9 @@ class LottieAnimation:
 
         return bytes(self.async_buffer_c)
 
-    def lottie_animation_property_override(self, _type: str, keypath: str, *args):
+    def lottie_animation_property_override(
+        self, _type: str, keypath: str, *args: Union[ctypes.c_float, ctypes.c_int]
+    ):
         """
         Request to change the properties of this animation object.
 
@@ -551,7 +600,7 @@ class LottieAnimation:
 
         :param str _type: Property type.
         :param str keypath: Specific content of target.
-        :param *args: Property values.
+        :param Union[ctypes.c_float, ctypes.c_int] *args: Property values.
         """
         _type_enum = [
             # Color property of Fill object
@@ -598,7 +647,7 @@ class LottieAnimation:
             *args,
         )
 
-    def lottie_animation_get_markerlist(self) -> Optional[list]:
+    def lottie_animation_get_markerlist(self) -> Optional[LOTMarkerList]:
         """
         Returns list of markers in the Lottie resource
 
@@ -609,7 +658,7 @@ class LottieAnimation:
         Example for getting content of markerlist: markerlist.ptr.name
 
         :return: The list of marker. If there is no marker, return None
-        :rtype: Optional[list]
+        :rtype: Optional[LOTMarkerList]
         """
         self.rlottie_lib.lottie_animation_get_markerlist.argtypes = [
             LottieAnimationPointer
@@ -679,7 +728,7 @@ class LottieAnimation:
             bytes_per_line=bytes_per_line,
         )
 
-        im = Image.frombuffer("RGBA", (width, height), buffer, "raw", "BGRA")
+        im = Image.frombuffer("RGBA", (width, height), buffer, "raw", "BGRA")  # type: ignore
 
         return im
 
@@ -691,8 +740,8 @@ class LottieAnimation:
         width: Optional[int] = None,
         height: Optional[int] = None,
         bytes_per_line: Optional[int] = None,
-        *args,
-        **kwargs,
+        *args: Any,
+        **kwargs: Any,
     ):
         """
         Save Image at frame_num to save_path
@@ -704,8 +753,8 @@ class LottieAnimation:
         :param Optional[int] width: width of the surface
         :param Optional[int] height: height of the surface
         :param Optional[int] bytes_per_line: stride of the surface in bytes.
-        :param *args: additional arguments passing to im.save()
-        :param **kwargs: additional arguments passing to im.save()
+        :param Any *args: additional arguments passing to im.save()
+        :param Any **kwargs: additional arguments passing to im.save()
         """
         im = self.render_pillow_frame(
             frame_num=frame_num,
@@ -726,8 +775,8 @@ class LottieAnimation:
         width: Optional[int] = None,
         height: Optional[int] = None,
         bytes_per_line: Optional[int] = None,
-        *args,
-        **kwargs,
+        *args: Any,
+        **kwargs: Any,
     ):
         """
         Save Image from frame_num_start to frame_num_end and save it to save_path.
@@ -749,8 +798,8 @@ class LottieAnimation:
         :param Optional[int] width: width of the surface
         :param Optional[int] height: height of the surface
         :param Optional[int] bytes_per_line: stride of the surface in bytes.
-        :param *args: additional arguments passing to im.save()
-        :param **kwargs: additional arguments passing to im.save()
+        :param Any *args: additional arguments passing to im.save()
+        :param Any **kwargs: additional arguments passing to im.save()
         """
         fps_orig = self.lottie_animation_get_framerate()
         duration = self.lottie_animation_get_duration()
@@ -780,7 +829,7 @@ class LottieAnimation:
         if frame_num_end is None:
             frame_num_end = frames
 
-        im_list = []
+        im_list: "list[Image.Image]" = []
         for frame in range(frame_num_start, frame_num_end):
             pos = frame / frame_num_end
             frame_num = self.lottie_animation_get_frame_at_pos(pos)

@@ -34,7 +34,7 @@ print(f"{mapped_frame = }")
 
 # Saving frame manually
 buffer = anim.lottie_animation_render(frame_num=30)
-im = Image.frombuffer("RGBA", (width, height), buffer, "raw", "BGRA")
+im = Image.frombuffer("RGBA", (width, height), buffer, "raw", "BGRA")  # type: ignore
 im.save("test1.png")
 
 # Loading from tgs file
@@ -47,7 +47,7 @@ im.save("test2.png")
 # Directly get buffer
 buffer = anim.lottie_animation_render(frame_num=50)
 width, height = anim.lottie_animation_get_size()
-im = Image.frombuffer("RGBA", (width, height), buffer, "raw", "BGRA")
+im = Image.frombuffer("RGBA", (width, height), buffer, "raw", "BGRA")  # type: ignore
 im.save("test3.png")
 
 # Directly get buffer, async
@@ -55,7 +55,7 @@ anim.lottie_animation_render_async(frame_num=50)
 # You may do other other tasks in between
 buffer = anim.lottie_animation_render_flush()
 width, height = anim.lottie_animation_get_size()
-im = Image.frombuffer("RGBA", (width, height), buffer, "raw", "BGRA")
+im = Image.frombuffer("RGBA", (width, height), buffer, "raw", "BGRA")  # type: ignore
 im.save("test4.png")
 
 # Loading JSON string with from_data()

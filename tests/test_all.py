@@ -1,16 +1,13 @@
 #!/usr/bin/env python3
 import ctypes
+from importlib.util import find_spec
 import os
 import platform
 
 import pytest
+from _pytest._py.path import LocalPath
 
-try:
-    from PIL import Image
-
-    PILLOW_LOADED = True
-except ModuleNotFoundError:
-    PILLOW_LOADED = False
+PILLOW_LOADED = True if find_spec("PIL") else False
 
 from rlottie_python import LottieAnimation
 from rlottie_python.rlottiecommon import LOTLayerNode
@@ -138,6 +135,8 @@ def test_lottie_configure_model_cache_size():
 
 @pytest.mark.skipif(PILLOW_LOADED is False, reason="Pillow not installed")
 def test_render_pillow_frame():
+    from PIL import Image
+
     with LottieAnimation.from_file(json_file) as anim:
         im = anim.render_pillow_frame()
 
@@ -145,7 +144,7 @@ def test_render_pillow_frame():
 
 
 @pytest.mark.skipif(PILLOW_LOADED is False, reason="Pillow not installed")
-def test_save_frame(tmpdir):
+def test_save_frame(tmpdir: LocalPath):
     tmppath = os.path.join(tmpdir, "0.png")
     with LottieAnimation.from_file(json_file) as anim:
         anim.save_frame(tmppath)
@@ -153,7 +152,7 @@ def test_save_frame(tmpdir):
     assert os.path.isfile(tmppath)
 
 
-def _test_save_animation(out):
+def _test_save_animation(out: str):
     with LottieAnimation.from_file(json_file) as anim:
         anim.save_frame(out)
 
@@ -161,13 +160,13 @@ def _test_save_animation(out):
 
 
 @pytest.mark.skipif(PILLOW_LOADED is False, reason="Pillow not installed")
-def test_save_animation_apng(tmpdir):
+def test_save_animation_apng(tmpdir: LocalPath):
     tmppath = os.path.join(tmpdir, "0.apng")
     _test_save_animation(tmppath)
 
 
 @pytest.mark.skipif(PILLOW_LOADED is False, reason="Pillow not installed")
-def test_save_animation_gif(tmpdir):
+def test_save_animation_gif(tmpdir: LocalPath):
     tmppath = os.path.join(tmpdir, "0.gif")
     _test_save_animation(tmppath)
 
@@ -176,6 +175,6 @@ def test_save_animation_gif(tmpdir):
 @pytest.mark.skipif(
     platform.python_implementation() == "PyPy", reason="Pillow without webp support"
 )
-def test_save_animation_webp(tmpdir):
+def test_save_animation_webp(tmpdir: LocalPath):
     tmppath = os.path.join(tmpdir, "0.webp")
     _test_save_animation(tmppath)

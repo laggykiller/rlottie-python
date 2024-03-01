@@ -37,15 +37,9 @@ abi3_minimum_cpython_version = 312
 [tool.py-build-cmake.linux.cmake] # Linux-specific options
 config = "Release"
 env = { "CMAKE_PREFIX_PATH" = "${HOME}/.local" }
-[tool.py-build-cmake.linux.cmake.options]
-CMAKE_CXX_FLAGS = "-fPIC"
 
 [tool.py-build-cmake.mac.cmake] # macOS-specific options
 config = "Release"
 
 [tool.py-build-cmake.windows.cmake] # Windows-specific options
 config = "Release"
-[tool.py-build-cmake.windows.cmake.options]
-CMAKE_MSVC_RUNTIME_LIBRARY = "MultiThreaded$<$<CONFIG:Debug>:Debug>"
-CMAKE_CXX_FLAGS_RELEASE = "/MT"
-CMAKE_CXX_FLAGS_DEBUG = "/MTd"
