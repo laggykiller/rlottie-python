@@ -77,7 +77,10 @@ class LottieAnimation:
 
             return None
 
-        lib_suffixes = [sysconfig.get_config_var("SHLIB_SUFFIX")]
+        lib_suffixes: "list[str]" = []
+        shlib_suffix = sysconfig.get_config_var("SHLIB_SUFFIX")
+        if isinstance(str, shlib_suffix):
+            lib_suffixes.append(shlib_suffix)
         if sys.platform.startswith(("win32", "cygwin", "msys", "os2")):
             lib_prefixes = ("", "lib")
         elif sys.platform.startswith("darwin"):
