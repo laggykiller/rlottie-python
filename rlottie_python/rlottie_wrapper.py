@@ -9,32 +9,12 @@ from types import TracebackType
 
 if TYPE_CHECKING:
     from PIL import Image
-from .rlottiecommon import LOTLayerNode, LOTMarkerList
+from ._rlottiecommon import LOTLayerNode, LOTMarkerList
 
 # References: rlottie/inc/rlottie.h
 
 
-def frange(start: float, stop: Optional[float] = None, step: Optional[float] = None):
-    # if set start=0.0 and step = 1.0 if not specified
-    start = float(start)
-    if stop is None:
-        stop = start + 0.0
-        start = 0.0
-    if step is None:
-        step = 1.0
-
-    count = 0
-    while True:
-        temp = float(start + count * step)
-        if step > 0 and temp >= stop:
-            break
-        elif step < 0 and temp <= stop:
-            break
-        yield temp
-        count += 1
-
-
-class LottieAnimationPointer(ctypes.c_void_p):
+class _LottieAnimationPointer(ctypes.c_void_p):
     pass
 
 
@@ -226,7 +206,7 @@ class LottieAnimation:
         :param str path: lottie resource file path
         """
         self.rlottie_lib.lottie_animation_from_file.argtypes = [ctypes.c_char_p]
-        self.rlottie_lib.lottie_animation_from_file.restype = LottieAnimationPointer
+        self.rlottie_lib.lottie_animation_from_file.restype = _LottieAnimationPointer
 
         if not os.path.isabs(path):
             path = os.path.abspath(path)
@@ -277,7 +257,7 @@ class LottieAnimation:
             ctypes.POINTER(ctypes.c_char * key_size),
             ctypes.POINTER(ctypes.c_char * resource_path_abs_size),
         ]
-        self.rlottie_lib.lottie_animation_from_data.restype = LottieAnimationPointer
+        self.rlottie_lib.lottie_animation_from_data.restype = _LottieAnimationPointer
 
         self.animation_p = self.rlottie_lib.lottie_animation_from_data(
             ctypes.byref(self.data_c),
@@ -294,7 +274,7 @@ class LottieAnimation:
         if not self.animation_p:
             return
 
-        self.rlottie_lib.lottie_animation_destroy.argtypes = [LottieAnimationPointer]
+        self.rlottie_lib.lottie_animation_destroy.argtypes = [_LottieAnimationPointer]
         self.rlottie_lib.lottie_animation_destroy.restype = ctypes.c_void_p
         self.rlottie_lib.lottie_animation_destroy(self.animation_p)
 
@@ -319,7 +299,7 @@ class LottieAnimation:
         :rtype: Tuple[int, int]
         """
         self.rlottie_lib.lottie_animation_get_size.argtypes = [
-            LottieAnimationPointer,
+            _LottieAnimationPointer,
             ctypes.POINTER(ctypes.c_size_t),
             ctypes.POINTER(ctypes.c_size_t),
         ]
@@ -346,7 +326,7 @@ class LottieAnimation:
         :rtype: int
         """
         self.rlottie_lib.lottie_animation_get_duration.argtypes = [
-            LottieAnimationPointer
+            _LottieAnimationPointer
         ]
         self.rlottie_lib.lottie_animation_get_duration.restype = ctypes.c_double
 
@@ -372,7 +352,7 @@ class LottieAnimation:
         :rtype: int
         """
         self.rlottie_lib.lottie_animation_get_framerate.argtypes = [
-            LottieAnimationPointer
+            _LottieAnimationPointer
         ]
         self.rlottie_lib.lottie_animation_get_framerate.restype = ctypes.c_double
 
@@ -401,7 +381,7 @@ class LottieAnimation:
         :rtype: rlottie_python.rlottiecommon.LOTLayerNode
         """
         self.rlottie_lib.lottie_animation_render_tree.argtypes = [
-            LottieAnimationPointer,
+            _LottieAnimationPointer,
             ctypes.c_size_t,
             ctypes.c_size_t,
             ctypes.c_size_t,
@@ -437,7 +417,7 @@ class LottieAnimation:
         :rtype: int
         """
         self.rlottie_lib.lottie_animation_get_frame_at_pos.argtypes = [
-            LottieAnimationPointer,
+            _LottieAnimationPointer,
             ctypes.c_float,
         ]
         self.rlottie_lib.lottie_animation_get_frame_at_pos.restype = ctypes.c_size_t
@@ -481,7 +461,7 @@ class LottieAnimation:
         buffer_c = ctypes.create_string_buffer(buffer_size)
 
         self.rlottie_lib.lottie_animation_render.argtypes = [
-            LottieAnimationPointer,
+            _LottieAnimationPointer,
             ctypes.c_size_t,
             ctypes.POINTER(ctypes.c_char * buffer_size),
             ctypes.c_size_t,
@@ -537,7 +517,7 @@ class LottieAnimation:
         self.async_buffer_c = ctypes.create_string_buffer(buffer_size)
 
         self.rlottie_lib.lottie_animation_render_async.argtypes = [
-            LottieAnimationPointer,
+            _LottieAnimationPointer,
             ctypes.c_size_t,
             ctypes.POINTER(ctypes.c_char * buffer_size),
             ctypes.c_size_t,
@@ -576,7 +556,7 @@ class LottieAnimation:
             )
 
         self.rlottie_lib.lottie_animation_get_duration.argtypes = [
-            LottieAnimationPointer
+            _LottieAnimationPointer
         ]
         self.rlottie_lib.lottie_animation_get_duration.restype = ctypes.c_uint32
 
@@ -665,7 +645,7 @@ class LottieAnimation:
         :rtype: Optional[LOTMarkerList]
         """
         self.rlottie_lib.lottie_animation_get_markerlist.argtypes = [
-            LottieAnimationPointer
+            _LottieAnimationPointer
         ]
         self.rlottie_lib.lottie_animation_get_markerlist.restype = ctypes.POINTER(
             LOTMarkerList

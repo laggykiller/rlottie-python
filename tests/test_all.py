@@ -10,7 +10,7 @@ from _pytest._py.path import LocalPath
 PILLOW_LOADED = True if find_spec("PIL") else False
 
 from rlottie_python import LottieAnimation
-from rlottie_python.rlottiecommon import LOTLayerNode
+from rlottie_python._rlottiecommon import LOTLayerNode
 
 file_dir = os.path.split(__file__)[0]
 json_file = os.path.join(file_dir, "../samples/sample.json")
