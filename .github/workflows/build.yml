@@ -80,7 +80,7 @@ jobs:
           platforms: all
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.16.5
+        uses: pypa/cibuildwheel@edd67e0d266e14537bbf2619e8c6a379ecb038fc
         env:
           CIBW_BUILD_FRONTEND: build
           CIBW_ARCHS_WINDOWS: ${{ matrix.cibw_archs_windows }}
