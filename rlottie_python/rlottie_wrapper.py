@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-import os
-import sys
 import ctypes
 import gzip
+import os
+import sys
+import sysconfig
 from typing import Any, Tuple, Union, Optional, Type, TYPE_CHECKING
 from types import TracebackType
 
@@ -76,35 +77,35 @@ class LottieAnimation:
 
             return None
 
-        if sys.platform.startswith("win32") or sys.platform.startswith("cygwin"):
-            lib_suffix = ".dll"
+        lib_suffixes = [sysconfig.get_config_var("SHLIB_SUFFIX")]
+        if sys.platform.startswith(("win32", "cygwin", "msys")):
             lib_prefixes = ("", "lib")
         elif sys.platform.startswith("darwin"):
-            lib_suffix = ".dylib"
             lib_prefixes = ("lib", "")
         else:
-            lib_suffix = ".so"
             lib_prefixes = ("lib", "")
+        lib_suffixes.extend([".so", ".dll", ".dylib"])
 
         package_dir = os.path.dirname(__file__)
 
         attempted_lib_paths: "list[str]" = []
         for lib_prefix in lib_prefixes:
-            rlottie_lib_name = lib_prefix + "rlottie" + lib_suffix
-            rlottie_lib_path_local = os.path.join(package_dir, rlottie_lib_name)
+            for lib_suffix in lib_suffixes:
+                rlottie_lib_name = lib_prefix + "rlottie" + lib_suffix
+                rlottie_lib_path_local = os.path.join(package_dir, rlottie_lib_name)
 
-            if os.path.isfile(rlottie_lib_path_local):
-                self.rlottie_lib_path = rlottie_lib_path_local
-            elif os.path.isfile(rlottie_lib_name):
-                self.rlottie_lib_path = os.path.abspath(rlottie_lib_name)
-            else:
-                self.rlottie_lib_path = rlottie_lib_name
+                if os.path.isfile(rlottie_lib_path_local):
+                    self.rlottie_lib_path = rlottie_lib_path_local
+                elif os.path.isfile(rlottie_lib_name):
+                    self.rlottie_lib_path = os.path.abspath(rlottie_lib_name)
+                else:
+                    self.rlottie_lib_path = rlottie_lib_name
 
-            try:
-                self.rlottie_lib = ctypes.CDLL(self.rlottie_lib_path)
-                return None
-            except OSError:
-                attempted_lib_paths.append(self.rlottie_lib_path)
+                try:
+                    self.rlottie_lib = ctypes.CDLL(self.rlottie_lib_path)
+                    return None
+                except OSError:
+                    attempted_lib_paths.append(self.rlottie_lib_path)
 
         raise OSError("Unable to load rlottie library at: " + str(attempted_lib_paths))
 
