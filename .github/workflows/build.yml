@@ -37,36 +37,47 @@ jobs:
           - os: windows-2019
             arch: x64
             cibw_archs_windows: AMD64
+            cibw_build: "cp37* pp37*"
           - os: windows-2019
             arch: x86
             cibw_archs_windows: x86
+            cibw_build: "cp37*"
           - os: windows-2019
             arch: arm64
             cibw_archs_windows: ARM64
+            cibw_build: "cp39*"
           - os: macos-12
             arch: x64
             cibw_archs_macos: x86_64
+            cibw_build: "cp37* pp37*"
           - os: macos-14
             arch: universal2
             cibw_archs_macos: universal2
+            cibw_build: "cp38* pp38*"
           - os: macos-14
             arch: arm64
             cibw_archs_macos: arm64
+            cibw_build: "cp38* pp38*"
           - os: ubuntu-20.04
             arch: x64
             cibw_archs_linux: x86_64
+            cibw_build: "cp37* pp37*"
           - os: ubuntu-20.04
             arch: x86
             cibw_archs_linux: i686
+            cibw_build: "cp37* pp37*"
           - os: ubuntu-20.04
             arch: arm64
             cibw_archs_linux: aarch64
+            cibw_build: "cp37* pp37*"
           - os: ubuntu-20.04
             arch: ppc64le
             cibw_archs_linux: ppc64le
+            cibw_build: "cp37*"
           - os: ubuntu-20.04
             arch: s390x
             cibw_archs_linux: s390x
+            cibw_build: "cp37*"
 
     steps:
       - uses: actions/checkout@v3
@@ -86,6 +97,7 @@ jobs:
           CIBW_ARCHS_WINDOWS: ${{ matrix.cibw_archs_windows }}
           CIBW_ARCHS_MACOS: ${{ matrix.cibw_archs_macos }}
           CIBW_ARCHS_LINUX: ${{ matrix.cibw_archs_linux }}
+          CIBW_BUILD: ${{ matrix.cibw_build }}
           CIBW_TEST_REQUIRES: pytest
           CIBW_BEFORE_TEST: pip install --only-binary ":all:" Pillow; true
           CIBW_BEFORE_TEST_WINDOWS: pip install --only-binary ":all:" Pillow || VER>NUL

@@ -32,7 +32,7 @@ source_path = "."
 build_args = ["-j"]
 install_components = ["python_module"]
 python_abi = 'abi3'
-abi3_minimum_cpython_version = 312
+abi3_minimum_cpython_version = 37
 
 [tool.py-build-cmake.linux.cmake] # Linux-specific options
 config = "Release"
