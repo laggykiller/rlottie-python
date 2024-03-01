@@ -113,7 +113,7 @@ jobs:
       - name: abi3audit
         run: |
           pip install abi3audit &&
-          abi3audit $(ls ./dist/*.whl) --debug --verbose
+          abi3audit $(ls ./wheelhouse/*.whl) --debug --verbose
 
       - uses: actions/upload-artifact@v3
         with:
