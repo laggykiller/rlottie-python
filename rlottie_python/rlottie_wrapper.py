@@ -27,12 +27,12 @@ class LottieAnimation:
         key_size: Optional[int] = None,
         resource_path: Optional[str] = None,
         rlottie_lib_path: Optional[str] = None,
-    ):
+    ) -> None:
         self.animation_p = None
-        self.data_c = None
-        self.key_c = None
-        self.resource_path_abs_c = None
-        self.async_buffer_c = None
+        self.data_c: Optional[ctypes.Array[ctypes.c_char]] = None
+        self.key_c: Optional[ctypes.Array[ctypes.c_char]] = None
+        self.resource_path_abs_c: Optional[ctypes.Array[ctypes.c_char]] = None
+        self.async_buffer_c: Optional[ctypes.Array[ctypes.c_char]] = None
 
         self._load_lib(rlottie_lib_path)
         self.lottie_init()
@@ -45,7 +45,7 @@ class LottieAnimation:
                 data=data, key_size=key_size, resource_path=resource_path
             )
 
-    def _load_lib(self, rlottie_lib_path: Optional[str] = None):
+    def _load_lib(self, rlottie_lib_path: Optional[str] = None) -> None:
         if rlottie_lib_path:
             self.rlottie_lib_path = rlottie_lib_path
 
@@ -93,11 +93,11 @@ class LottieAnimation:
 
         raise OSError("Unable to load rlottie library at: " + str(attempted_lib_paths))
 
-    def __del__(self):
+    def __del__(self) -> None:
         if self.rlottie_lib:
             self.lottie_animation_destroy()
 
-    def __enter__(self):
+    def __enter__(self) -> "LottieAnimation":
         return self
 
     def __exit__(
@@ -105,7 +105,7 @@ class LottieAnimation:
         exc_type: Optional[Type[BaseException]],
         exc_val: Optional[BaseException],
         exc_tb: Optional[TracebackType],
-    ):
+    ) -> None:
         if self.rlottie_lib:
             self.lottie_animation_destroy()
 
@@ -172,7 +172,7 @@ class LottieAnimation:
             data = f.read().decode(encoding="utf-8")
         return cls(data=data, rlottie_lib_path=rlottie_lib_path)
 
-    def lottie_init(self):
+    def lottie_init(self) -> None:
         """
         Runs lottie initialization code when rlottie library is loaded
         dynamically.
@@ -184,7 +184,7 @@ class LottieAnimation:
         self.rlottie_lib.lottie_init.restype = ctypes.c_void_p
         self.rlottie_lib.lottie_init()
 
-    def lottie_shutdown(self):
+    def lottie_shutdown(self) -> None:
         """
         Runs lottie teardown code when rlottie library is loaded
         dynamically.
@@ -197,7 +197,7 @@ class LottieAnimation:
         self.rlottie_lib.lottie_shutdown.restype = ctypes.c_void_p
         self.rlottie_lib.lottie_shutdown()
 
-    def lottie_animation_from_file(self, path: str):
+    def lottie_animation_from_file(self, path: str) -> None:
         """
         Constructs an animation object from JSON file path.
 
@@ -225,7 +225,7 @@ class LottieAnimation:
         data: str,
         key_size: Optional[int] = None,
         resource_path: Optional[str] = None,
-    ):
+    ) -> None:
         """
         Constructs an animation object from JSON string data.
 
@@ -266,7 +266,7 @@ class LottieAnimation:
             ctypes.byref(self.resource_path_abs_c),
         )
 
-    def lottie_animation_destroy(self):
+    def lottie_animation_destroy(self) -> None:
         """
         Free given Animation object resource.
 
@@ -493,7 +493,7 @@ class LottieAnimation:
         width: Optional[int] = None,
         height: Optional[int] = None,
         bytes_per_line: Optional[int] = None,
-    ):
+    ) -> None:
         """
         Request to render the content of the frame frame_num to buffer asynchronously.
 
@@ -567,7 +567,7 @@ class LottieAnimation:
 
     def lottie_animation_property_override(
         self, _type: str, keypath: str, *args: Union[ctypes.c_float, ctypes.c_int]
-    ):
+    ) -> None:
         """
         Request to change the properties of this animation object.
 
@@ -659,7 +659,7 @@ class LottieAnimation:
         except ValueError:  # NULL pointer access
             return None
 
-    def lottie_configure_model_cache_size(self, cache_size: int):
+    def lottie_configure_model_cache_size(self, cache_size: int) -> None:
         """
         Configures rlottie model cache policy.
 
@@ -727,7 +727,7 @@ class LottieAnimation:
         bytes_per_line: Optional[int] = None,
         *args: Any,
         **kwargs: Any,
-    ):
+    ) -> None:
         """
         Save Image at frame_num to save_path
 
@@ -762,7 +762,7 @@ class LottieAnimation:
         bytes_per_line: Optional[int] = None,
         *args: Any,
         **kwargs: Any,
-    ):
+    ) -> None:
         """
         Save Image from frame_num_start to frame_num_end and save it to save_path.
 

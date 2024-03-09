@@ -23,13 +23,13 @@ jobs:
       with:
         python-version: '3.9'
     - name: Install dependency
-      run: pip install ruff pyright isort pytest
+      run: pip install ruff mypy isort pytest Pillow types-Pillow
     - name: Ruff check
       run: ruff check
     - name: Install test
       run: pip install .
-    - name: pyright
-      run: pyright
+    - name: mypy
+      run: mypy
     - name: isort
       run: isort .
     - name: ruff format
