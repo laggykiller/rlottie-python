@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 import ctypes
-from importlib.util import find_spec
 import os
 import platform
+from importlib.util import find_spec
 
 import pytest
 from _pytest._py.path import LocalPath
 
-PILLOW_LOADED = True if find_spec("PIL") else False
-
 from rlottie_python import LottieAnimation
 from rlottie_python._rlottiecommon import LOTLayerNode
+
+PILLOW_LOADED = True if find_spec("PIL") else False
 
 file_dir = os.path.split(__file__)[0]
 json_file = os.path.join(file_dir, "../samples/sample.json")

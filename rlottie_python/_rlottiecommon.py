@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 from ctypes import (
+    POINTER,
+    Structure,
     c_char,
     c_char_p,
-    c_size_t,
     c_float,
     c_int,
+    c_size_t,
     c_ubyte,
-    Structure,
-    POINTER,
 )
 
 # References: rlottie/inc/rlottiecommon.h

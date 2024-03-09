@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import os
+
 from PIL import Image
+
 from rlottie_python import LottieAnimation
 
 file_dir = os.path.split(__file__)[0]

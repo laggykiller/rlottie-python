@@ -4,11 +4,12 @@ import gzip
 import os
 import sys
 import sysconfig
-from typing import Any, Tuple, Union, Optional, Type, TYPE_CHECKING
 from types import TracebackType
+from typing import TYPE_CHECKING, Any, List, Optional, Tuple, Type, Union
 
 if TYPE_CHECKING:
     from PIL import Image
+
 from ._rlottiecommon import LOTLayerNode, LOTMarkerList
 
 # References: rlottie/inc/rlottie.h
@@ -57,7 +58,7 @@ class LottieAnimation:
 
             return None
 
-        lib_suffixes: "list[str]" = []
+        lib_suffixes: List[str] = []
         shlib_suffix = sysconfig.get_config_var("SHLIB_SUFFIX")
         if isinstance(shlib_suffix, str):
             lib_suffixes.append(shlib_suffix)
@@ -71,7 +72,7 @@ class LottieAnimation:
 
         package_dir = os.path.dirname(__file__)
 
-        attempted_lib_paths: "list[str]" = []
+        attempted_lib_paths: List[str] = []
         for lib_prefix in lib_prefixes:
             for lib_suffix in lib_suffixes:
                 rlottie_lib_name = lib_prefix + "rlottie" + lib_suffix
@@ -813,7 +814,7 @@ class LottieAnimation:
         if frame_num_end is None:
             frame_num_end = frames
 
-        im_list: "list[Image.Image]" = []
+        im_list: List[Image.Image] = []
         for frame in range(frame_num_start, frame_num_end):
             pos = frame / frame_num_end
             frame_num = self.lottie_animation_get_frame_at_pos(pos)

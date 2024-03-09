@@ -43,3 +43,10 @@ config = "Release"
 
 [tool.py-build-cmake.windows.cmake] # Windows-specific options
 config = "Release"
+
+[tool.pyright]
+include = ["rlottie_python", "tests", "example"]
+strict = ["*"]
+
+[tool.mypy]
+python_version = "3.9"

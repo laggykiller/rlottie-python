@@ -9,7 +9,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.abspath("../"))
-import rlottie_python  # type: ignore
+import rlottie_python  # type: ignore # noqa: F401
 
 project = "rlottie-python"
 copyright = "2023, laggykiller"
