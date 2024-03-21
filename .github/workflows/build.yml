@@ -19,7 +19,8 @@ jobs:
 
       - name: Test sdist
         run: |
-          python -m pip install dist/rlottie_python-*.tar.gz[full,test]
+          python -m pip install dist/rlottie_python-*.tar.gz
+          pip install Pillow pytest
           pytest
 
       - uses: actions/upload-artifact@v3
