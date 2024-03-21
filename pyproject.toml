@@ -15,13 +15,29 @@ Repository = "https://github.com/laggykiller/rlottie-python"
 Documentation = "https://rlottie-python.readthedocs.io/en/latest/"
 Tracker = "https://github.com/laggykiller/rlottie-python/issues"
 
+[project.optional-dependencies]
+full = [
+    "Pillow",
+]
+
+test = [
+    "pytest"
+]
+
+lint = [
+    "ruff",
+    "mypy",
+    "isort",
+    "types-Pillow",
+]
+
 [build-system] # How pip and other frontends should build this project
 requires = ["py-build-cmake~=0.2.0a12"]
 build-backend = "py_build_cmake.build"
 
 [tool.py-build-cmake.module] # Where to find the Python module to package
 name = "rlottie_python"
-directory = "."
+directory = "src"
 
 [tool.py-build-cmake.sdist] # What to include in source distributions
 include = ["CMakeLists.txt", "rlottie/*"]
@@ -45,9 +61,9 @@ config = "Release"
 config = "Release"
 
 [tool.pyright]
-include = ["rlottie_python", "tests", "example"]
+include = ["src", "tests", "example"]
 strict = ["*"]
 
 [tool.mypy]
 python_version = "3.9"
-files = ["rlottie_python", "tests", "example"]
+files = ["src", "tests", "example"]
