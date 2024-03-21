@@ -19,8 +19,7 @@ jobs:
 
       - name: Test sdist
         run: |
-          python -m pip install dist/rlottie_python-*.tar.gz
-          pip install pytest Pillow &&
+          python -m pip install dist/rlottie_python-*.tar.gz[full,test]
           pytest
 
       - uses: actions/upload-artifact@v3
@@ -112,7 +111,7 @@ jobs:
       
       - name: abi3audit
         run: |
-          pip install abi3audit &&
+          pip install abi3audit
           abi3audit $(ls ./wheelhouse/*.whl) --debug --verbose
 
       - uses: actions/upload-artifact@v3
