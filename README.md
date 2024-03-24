@@ -105,6 +105,14 @@ with LottieAnimation.from_file("samples/sample.json") as anim:
     anim.save_animation("animation4.apng")
 ```
 
+Notice, if you are running on Linux and want to use rlottie_python in main process
+and child processes spawned by `multiprocessing.Process`, you may have to change
+start method to `spawn`, or else deadlock may occur:
+```python
+if __name__ == "__main__":
+    multiprocessing.set_start_method("spawn")
+```
+
 ## Comparing to other library
 The `lottie` (https://pypi.org/project/lottie/) python package is also capable of working with lottie files and telegram animated stickers (tgs). It is also able to support many input/output formats and vector graphics, without any dependency on extenral libraries such as librlottie. However some images it creates is broken ([Example1](https://github.com/laggykiller/sticker-convert/issues/5) [Example2](https://gitlab.com/mattbas/python-lottie/-/issues/95)). It seems librlottie is more stable in terms of rendering frames.
 
