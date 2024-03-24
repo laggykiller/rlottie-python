@@ -37,8 +37,6 @@ def _load_lib_with_prefix_suffix(
 
 def _load_lib(rlottie_lib_path: Optional[str] = None) -> Optional[ctypes.CDLL]:
     if rlottie_lib_path:
-        rlottie_lib_path = rlottie_lib_path
-
         try:
             return ctypes.cdll.LoadLibrary(rlottie_lib_path)
         except OSError:
