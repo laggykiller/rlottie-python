@@ -46,6 +46,7 @@ include = ["CMakeLists.txt", "rlottie/*"]
 build_type = "Release"
 source_path = "."
 build_args = ["-j"]
+options = {"LOTTIE_MODULE" = "OFF"}
 install_components = ["python_module"]
 python_abi = 'abi3'
 abi3_minimum_cpython_version = 37
