@@ -4,15 +4,16 @@ import gzip
 import os
 import sys
 import sysconfig
+from enum import IntEnum
 from types import TracebackType
-from typing import TYPE_CHECKING, Any, List, Optional, Tuple, Type, Union
+from typing import TYPE_CHECKING, Any, List, Optional, Tuple, Type
 
 if TYPE_CHECKING:
     from PIL import Image
 
 from ._rlottiecommon import LOTLayerNode, LOTMarkerList
 
-# References: rlottie/inc/rlottie.h
+# References: rlottie/inc/rlottie_capi.h
 
 
 def _load_lib_with_prefix_suffix(
@@ -78,6 +79,23 @@ RLOTTIE_LIB = _load_lib()
 
 class _LottieAnimationPointer(ctypes.c_void_p):
     pass
+
+
+class LottieAnimationProperty(IntEnum):
+    LOTTIE_ANIMATION_PROPERTY_FILLCOLOR = 0
+    LOTTIE_ANIMATION_PROPERTY_FILLOPACITY = 1
+    LOTTIE_ANIMATION_PROPERTY_STROKECOLOR = 2
+    LOTTIE_ANIMATION_PROPERTY_STROKEOPACITY = 3
+    LOTTIE_ANIMATION_PROPERTY_STROKEWIDTH = 4
+    LOTTIE_ANIMATION_PROPERTY_TR_ANCHOR = 5
+    LOTTIE_ANIMATION_PROPERTY_TR_POSITION = 6
+    LOTTIE_ANIMATION_PROPERTY_TR_SCALE = 7
+    LOTTIE_ANIMATION_PROPERTY_TR_ROTATION = 8
+    LOTTIE_ANIMATION_PROPERTY_TR_OPACITY = 9
+
+    @classmethod
+    def from_param(cls, obj: int) -> int:
+        return int(obj)
 
 
 class LottieAnimation:
@@ -593,7 +611,7 @@ class LottieAnimation:
         return bytes(self.async_buffer_c)
 
     def lottie_animation_property_override(
-        self, _type: str, keypath: str, *args: Union[ctypes.c_float, ctypes.c_int]
+        self, _type: LottieAnimationProperty, keypath: str, *args: ctypes.c_double
     ) -> None:
         """
         Request to change the properties of this animation object.
@@ -601,60 +619,98 @@ class LottieAnimation:
         Keypath should conatin object names separated by (.)
         and can handle globe(**) or wildchar(*)
 
+        .. list-table:: Possible values of _types and args
+            :header-rows: 1
+
+            * - _type LottieAnimationProperty
+              - No. of args
+              - args value
+              - Description
+            * - LOTTIE_ANIMATION_PROPERTY_FILLCOLOR
+              - 3 args
+              - [0 ... 1]
+              - Color property of Fill object:
+            * - LOTTIE_ANIMATION_PROPERTY_FILLOPACITY
+              - 1 args
+              - [0 ... 100]
+              - Opacity property of Fill object
+            * - LOTTIE_ANIMATION_PROPERTY_STROKECOLOR
+              - 3 args
+              - [0 ... 1]
+              - Color property of Stroke object
+            * - LOTTIE_ANIMATION_PROPERTY_STROKEOPACITY
+              - 1 args
+              - [0 ... 100]
+              - Opacity property of Stroke object
+            * - LOTTIE_ANIMATION_PROPERTY_STROKEWIDTH
+              - 1 args
+              - [0 ... +inf]
+              - Stroke width property of Stroke object
+            * - LOTTIE_ANIMATION_PROPERTY_TR_ANCHOR
+              - 0 args
+              - Any
+              - Transform Anchor property of Layer and Group object
+            * - LOTTIE_ANIMATION_PROPERTY_TR_POSITION
+              - 2 args
+              - Any
+              - Transform Position property of Layer and Group object
+            * - LOTTIE_ANIMATION_PROPERTY_TR_SCALE
+              - 2 args
+              - Any
+              - Transform Scale property of Layer and Group object
+            * - LOTTIE_ANIMATION_PROPERTY_TR_ROTATION
+              - 1 args
+              - [0 ... 360]
+              - Transform Scale property of Layer and Group object
+            * - LOTTIE_ANIMATION_PROPERTY_TR_OPACITY
+              - 0 args
+              - Any
+              - Transform Opacity property of Layer and Group object
+
         Example:
-        lottie_animation_property_override(
-        "LOTTIE_ANIMATION_PROPERTY_FILLCOLOR",
-        "layer1.group1.fill1",
-        ctypes.c_float(1.0),
-        ctypes.c_float(0.0),
-        ctypes.c_float(0.0)
-        )
+        To change fillcolor property of fill1 object in the
+        layer1->group1->fill1 hirarchy to RED color:
 
-        :param str _type: Property type.
+        .. code-block:: python
+
+            lottie_animation_property_override(
+                LottieAnimationProperty.LOTTIE_ANIMATION_PROPERTY_FILLCOLOR,
+                "layer1.group1.fill1",
+                ctypes.c_double(1.0),
+                ctypes.c_double(0.0),
+                ctypes.c_double(0.0)
+            )
+
+        If all the color property inside group1 needs to be changed to GREEN color:
+
+        .. code-block:: python
+
+            lottie_animation_property_override(
+                LottieAnimationProperty.LOTTIE_ANIMATION_PROPERTY_FILLCOLOR,
+                "**.group1.**",
+                ctypes.c_double(0.0),
+                ctypes.c_double(1.0),
+                ctypes.c_double(0.0)
+            )
+
+        :param LottieAnimationProperty _type: Property type.
         :param str keypath: Specific content of target.
-        :param Union[ctypes.c_float, ctypes.c_int] *args: Property values.
+        :param ctypes.c_double *args: Property values.
         """
-        _type_enum = [
-            # Color property of Fill object
-            # value type is float [0 ... 1]
-            "LOTTIE_ANIMATION_PROPERTY_FILLCOLOR",
-            # Opacity property of Fill object
-            # value type is float [ 0 .. 100]
-            "LOTTIE_ANIMATION_PROPERTY_FILLOPACITY",
-            # Color property of Stroke object
-            # value type is float [0 ... 1]
-            "LOTTIE_ANIMATION_PROPERTY_STROKECOLOR",
-            # Opacity property of Stroke object
-            # value type is float [ 0 .. 100]
-            "LOTTIE_ANIMATION_PROPERTY_STROKEOPACITY",
-            # stroke with property of Stroke object
-            # value type is float
-            "LOTTIE_ANIMATION_PROPERTY_STROKEWIDTH",
-            # Transform Anchor property of Layer and Group object
-            # value type is int
-            "LOTTIE_ANIMATION_PROPERTY_TR_ANCHOR",
-            # Transform Position property of Layer and Group object
-            # value type is int
-            "LOTTIE_ANIMATION_PROPERTY_TR_POSITION",
-            # Transform Scale property of Layer and Group object
-            # value type is float range[0 ..100]
-            "LOTTIE_ANIMATION_PROPERTY_TR_SCALE",
-            # Transform Scale property of Layer and Group object
-            # value type is float. range[0 .. 360] in degrees
-            "LOTTIE_ANIMATION_PROPERTY_TR_ROTATION",
-            # Transform Opacity property of Layer and Group object
-            # value type is float [ 0 .. 100]
-            "LOTTIE_ANIMATION_PROPERTY_TR_OPACITY",
+        argtypes: List[Any] = [
+            _LottieAnimationPointer,
+            LottieAnimationProperty,
+            ctypes.c_wchar_p,
         ]
+        for _ in args:
+            argtypes.append(ctypes.c_double)
 
-        try:
-            _type_index = _type_enum.index(_type)
-        except IndexError:
-            raise IndexError("Invalid _type")
+        self.rlottie_lib.lottie_animation_property_override.argtypes = argtypes
+        self.rlottie_lib.lottie_animation_property_override.restype = ctypes.c_void_p
 
         self.rlottie_lib.lottie_animation_property_override(
             self.animation_p,
-            ctypes.c_int(_type_index),
+            _type,
             ctypes.c_wchar_p(keypath),
             *args,
         )

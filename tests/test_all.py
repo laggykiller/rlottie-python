@@ -7,7 +7,7 @@ from importlib.util import find_spec
 import pytest
 from _pytest._py.path import LocalPath
 
-from rlottie_python import LottieAnimation
+from rlottie_python import LottieAnimation, LottieAnimationProperty
 from rlottie_python._rlottiecommon import LOTLayerNode
 
 PILLOW_LOADED = True if find_spec("PIL") else False
@@ -113,11 +113,11 @@ def test_lottie_animation_render_async():
 def test_lottie_animation_property_override():
     with LottieAnimation.from_file(json_file) as anim:
         anim.lottie_animation_property_override(
-            "LOTTIE_ANIMATION_PROPERTY_FILLCOLOR",
-            "layer1.group1.fill1",
-            ctypes.c_float(1.0),
-            ctypes.c_float(0.0),
-            ctypes.c_float(0.0),
+            LottieAnimationProperty.LOTTIE_ANIMATION_PROPERTY_FILLCOLOR,
+            "**.**.**",
+            ctypes.c_double(1.0),
+            ctypes.c_double(0.0),
+            ctypes.c_double(0.0),
         )
 
 

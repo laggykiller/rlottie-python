@@ -3,4 +3,7 @@
 
 __version__ = "1.3.5"
 
-from .rlottie_wrapper import LottieAnimation  # type: ignore # noqa: F401
+from .rlottie_wrapper import (
+    LottieAnimation,  # type: ignore # noqa: F401
+    LottieAnimationProperty,  # type: ignore # noqa: F401
+)

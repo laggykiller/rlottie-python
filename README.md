@@ -4,7 +4,7 @@ A ctypes API for rlottie, with additional functions for getting Pillow Image and
 
 See example/example.py for example usage.
 
-The functions mostly follow [rlottie/inc/rlottie.h](https://github.com/Samsung/rlottie/blob/master/inc/rlottie.h)
+The functions mostly follow [rlottie/inc/rlottie_capi.h](https://github.com/Samsung/rlottie/blob/master/inc/rlottie_capi.h)
 
 Documentations: https://rlottie-python.readthedocs.io/en/latest/
 
