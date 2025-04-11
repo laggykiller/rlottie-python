@@ -32,7 +32,7 @@ lint = [
 ]
 
 [build-system] # How pip and other frontends should build this project
-requires = ["py-build-cmake~=0.2.0a12"]
+requires = ["py-build-cmake>=0.4.3"]
 build-backend = "py_build_cmake.build"
 
 [tool.py-build-cmake.module] # Where to find the Python module to package
@@ -46,10 +46,8 @@ include = ["CMakeLists.txt", "rlottie/*"]
 build_type = "Release"
 source_path = "."
 build_args = ["-j"]
-options = {"LOTTIE_MODULE" = "OFF"}
+options = {"LOTTIE_MODULE" = "OFF", "CMAKE_POLICY_VERSION_MINIMUM" = "3.5"}
 install_components = ["python_module"]
-python_abi = 'abi3'
-abi3_minimum_cpython_version = 37
 
 [tool.py-build-cmake.linux.cmake] # Linux-specific options
 config = "Release"
@@ -60,6 +58,10 @@ config = "Release"
 
 [tool.py-build-cmake.windows.cmake] # Windows-specific options
 config = "Release"
+
+[tool.py-build-cmake.wheel]
+python_abi = 'abi3'
+abi3_minimum_cpython_version = 37
 
 [tool.pyright]
 include = ["src", "tests", "example"]
