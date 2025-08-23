@@ -700,7 +700,7 @@ class LottieAnimation:
         argtypes: List[Any] = [
             _LottieAnimationPointer,
             LottieAnimationProperty,
-            ctypes.c_wchar_p,
+            ctypes.c_char_p,
         ]
         for _ in args:
             argtypes.append(ctypes.c_double)
@@ -711,7 +711,7 @@ class LottieAnimation:
         self.rlottie_lib.lottie_animation_property_override(
             self.animation_p,
             _type,
-            ctypes.c_wchar_p(keypath),
+            ctypes.c_char_p(keypath.encode("utf-8")),
             *args,
         )
 
