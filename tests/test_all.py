@@ -120,7 +120,7 @@ def test_lottie_animation_property_override():
             ctypes.c_double(0.0),
         )
         frame = anim.render_pillow_frame(0)
-    assert frame.getpixel((75,380)) == (255, 0, 0, 255)  # type: ignore
+    assert frame.getpixel((75, 380)) == (255, 0, 0, 255)  # type: ignore
 
 
 def test_lottie_animation_get_markerlist():
