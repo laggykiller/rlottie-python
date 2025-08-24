@@ -111,14 +111,16 @@ def test_lottie_animation_render_async():
 
 
 def test_lottie_animation_property_override():
-    with LottieAnimation.from_file(json_file) as anim:
+    with LottieAnimation.from_tgs(tgs_file) as anim:
         anim.lottie_animation_property_override(
             LottieAnimationProperty.LOTTIE_ANIMATION_PROPERTY_FILLCOLOR,
-            "**.**.**",
+            "Shape Layer 3.Fill 1",
             ctypes.c_double(1.0),
             ctypes.c_double(0.0),
             ctypes.c_double(0.0),
         )
+        frame = anim.render_pillow_frame(0)
+    assert frame.getpixel((75,380)) == (255, 0, 0, 255)  # type: ignore
 
 
 def test_lottie_animation_get_markerlist():
